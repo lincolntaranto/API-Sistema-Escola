@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from security import hash_senha
@@ -16,9 +16,7 @@ async def autenticar():
 async def criar_conta(nome: str, senha: str, cargo: int, email: str, numero: str, session: Session = Depends(get_session)):
     usuario = session.query(Usuario).filter(Usuario.email==email).first()
     if usuario:
-        return {
-            "mensagem": "email já cadastrado!"
-        }
+        raise HTTPException(status_code=400, detail="email já cadastrado!")
     else:
         senha_criptografada = hash_senha(senha)
         novo_usuario = Usuario(nome = nome, senha = senha_criptografada, cargo = cargo, email = email, numero = numero)
@@ -26,7 +24,7 @@ async def criar_conta(nome: str, senha: str, cargo: int, email: str, numero: str
         session.commit()
         session.refresh(novo_usuario)
         return {
-            "code": 200,
             "mensagem": "usuário cadastrado com sucesso!",
             "id": novo_usuario.id
+            "email": novo_usuario.email
         }
