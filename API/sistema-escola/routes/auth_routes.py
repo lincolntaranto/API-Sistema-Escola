@@ -25,6 +25,6 @@ async def criar_conta(nome: str, senha: str, cargo: int, email: str, numero: str
         session.refresh(novo_usuario)
         return {
             "mensagem": "usuário cadastrado com sucesso!",
-            "id": novo_usuario.id
+            "id": novo_usuario.id,
             "email": novo_usuario.email
         }
