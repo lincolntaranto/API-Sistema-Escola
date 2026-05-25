@@ -13,7 +13,3 @@ class Usuario(Base):
     cargo = Column(ForeignKey("cargos.id"), nullable=False)
     email = Column(String(100), nullable=False)
     numero = Column(String(100), nullable=False)
-
-    def __init__(self, senha, **kwargs):
-        super().__init__(**kwargs)
-        self.senha = bcrypt.hash(senha)
