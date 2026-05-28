@@ -49,10 +49,10 @@ async def login(login_schema: LoginSchema, session: Session = Depends(get_sessio
     if not usuario:
         raise HTTPException(status_code=400, detail="usuário não encontrado ou senha incorreta.")
     else:
-        acess_token = criar_token(usuario.id)
+        access_token = criar_token(usuario.id)
         refresh_token = criar_token(usuario.id, timedelta(days=5))
         return {
-            "acess_token": acess_token,
+            "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "Bearer"
         }
@@ -63,9 +63,9 @@ async def login_form(dados_formulario: OAuth2PasswordRequestForm = Depends(), se
     if not usuario:
         raise HTTPException(status_code=400, detail="usuário não encontrado ou senha incorreta.")
     else:
-        acess_token = criar_token(usuario.id)
+        access_token = criar_token(usuario.id)
         return {
-            "acess_token": acess_token,
+            "access_token": access_token,
             "token_type": "Bearer"
         }
 
