@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+
 from sqlalchemy.orm import Session
 
 from schemas.login import LoginSchema
-from security import hash_senha, autenticar_usuario
+from security import hash_senha, autenticar_usuario, verificar_token
 from security import criar_token
 
 from models import Usuario
@@ -46,7 +50,29 @@ async def login(login_schema: LoginSchema, session: Session = Depends(get_sessio
         raise HTTPException(status_code=400, detail="usuário não encontrado ou senha incorreta.")
     else:
         acess_token = criar_token(usuario.id)
+        refresh_token = criar_token(usuario.id, timedelta(days=5))
+        return {
+            "acess_token": acess_token,
+            "refresh_token": refresh_token,
+            "token_type": "Bearer"
+        }
+
+@auth_router.post("/login-form")
+async def login_form(dados_formulario: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+    usuario = autenticar_usuario(dados_formulario.username, dados_formulario.password, session)
+    if not usuario:
+        raise HTTPException(status_code=400, detail="usuário não encontrado ou senha incorreta.")
+    else:
+        acess_token = criar_token(usuario.id)
         return {
             "acess_token": acess_token,
             "token_type": "Bearer"
         }
+
+@auth_router.get("/refresh")
+async def user_refresh_token(usuario: Usuario = Depends(verificar_token)):
+    acess_token = criar_token(usuario.id)
+    return {
+        "acess_token": acess_token,
+        "token_type": "Bearer"
+    }
