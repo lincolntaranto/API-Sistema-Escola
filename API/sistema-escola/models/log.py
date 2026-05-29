@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, Integer, ForeignKey, String, DateTime
 
@@ -11,4 +11,4 @@ class Log(Base):
     id_usuario = Column(ForeignKey("usuarios.id"), nullable=False)
     acao = Column(String(100), nullable=False)
     descricao = Column(String(100), nullable=True)
-    data_hora = Column(DateTime, default=lambda: datetime.now(datetime.timezone.utc), nullable=False)
+    data_hora = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
