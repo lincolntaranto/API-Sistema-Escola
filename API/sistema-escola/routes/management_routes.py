@@ -46,5 +46,8 @@ async def apagar_aluno(id_aluno: int, session: Session = Depends(get_session)):
     session.delete(aluno)
     session.commit()
     return {
-        "mensagem": "Aluno deletado com sucesso!"
+        "mensagem": "Aluno deletado com sucesso!",
+        "id": aluno.id,
+        "nome": aluno.nome,
+        "turma": aluno.turma
     }
