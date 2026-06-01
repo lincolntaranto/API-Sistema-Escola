@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 
 from models.log import Log
 from models.session import get_session
-from models import Aluno, Usuario, Turma
+from models import Aluno, Usuario, Turma, usuario
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.turma.turma import TurmaSchema
+from schemas.turma.turma_update import TurmaUpdateSchema
 from security import verificar_token
 
 management_router = APIRouter(prefix="/management", tags=["management"])
@@ -222,4 +223,43 @@ async def apagar_turma(id_turma: int,
         "serie": turma.serie,
         "turno": turma.turno,
         "ano": turma.ano
+    }
+
+@management_router.patch("/atualizar_turma")
+async def atualizar_turma(id_turma: int,
+                          turma_update_schema: TurmaUpdateSchema,
+                          session: Session = Depends(get_session),
+                          usuario: Usuario = Depends(verificar_token)):
+    """Rota para atualizar uma turma do sistema."""
+
+    turma = session.get(Turma, id_turma)
+    if not turma:
+        raise HTTPException(status_code=404, detail="Turma inexistente!")
+
+    if turma_update_schema.nome is not None:
+        turma.nome = turma_update_schema.nome
+    if turma_update_schema.serie is not None:
+        turma.serie = turma_update_schema.serie
+    if turma_update_schema.ano is not None:
+        turma.ano = turma_update_schema.ano
+    if turma_update_schema.turno is not None:
+        turma.turno = turma_update_schema.turno
+
+    log = Log(
+        id_usuario=usuario.id,
+        acao="atualizar_turma",
+        descricao=f"Turma {turma.nome}, de ID {turma.id}, foi atualizada."
+    )
+
+    session.add(log)
+    session.commit()
+    session.refresh(turma)
+
+    return{
+        "mensagem": "Turma atualizada com sucesso!",
+        "id": turma.id,
+        "nome": turma.nome,
+        "serie": turma.serie,
+        "ano": turma.ano,
+        "turno": turma.turno
     }
