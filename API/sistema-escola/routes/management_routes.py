@@ -6,6 +6,7 @@ from models.session import get_session
 from models import Aluno, Usuario, Turma
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
+from schemas.turma.turma import TurmaSchema
 from security import verificar_token
 
 management_router = APIRouter(prefix="/management", tags=["management"])
@@ -158,4 +159,41 @@ async def mostrar_turmas(id_turma: int,
         "serie": turma.serie,
         "ano": turma.ano,
         "turno": turma.turno
+    }
+
+@management_router.post("/cadastrar_turma")
+async def cadastrar_turma(turma_schema: TurmaSchema,
+                          session: Session = Depends(get_session),
+                          usuario: Usuario = Depends(verificar_token)
+):
+    """Rota para cadastrar uma turma no sistema"""
+
+    turma= session.query(Turma).filter(Turma.nome == turma_schema.nome,
+                                       Turma.serie == turma_schema.serie,
+                                       Turma.turno == turma_schema.turno).first()
+    if turma:
+        raise HTTPException(status_code=400, detail="Turma já cadastrada!")
+    nova_turma = Turma(
+        nome=turma_schema.nome,
+        serie=turma_schema.serie,
+        ano=turma_schema.ano,
+        turno=turma_schema.turno
+    )
+    session.add(nova_turma)
+    session.flush()
+    log = Log(
+        id_usuario=usuario.id,
+        acao="cadastrar_turma",
+        descricao=f"Turma {nova_turma.nome}, de ID {nova_turma.id}, foi cadastrada!"
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(nova_turma)
+    return{
+        "mensagem": "Turma cadastrada com sucesso!",
+        "id": nova_turma.id,
+        "nome": nova_turma.nome,
+        "serie": nova_turma.serie,
+        "ano": nova_turma.ano,
+        "turno": nova_turma.turno
     }
