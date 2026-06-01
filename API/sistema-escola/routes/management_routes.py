@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from crud import update_model
 from models.log import Log
 from models.session import get_session
 from models import Aluno, Usuario, Turma, usuario
@@ -52,7 +53,7 @@ async def cadastrar_aluno(aluno_schema: AlunoSchema,
         data_nascimento=aluno_schema.data_nascimento,
         turma=aluno_schema.turma,
         nome_responsavel=aluno_schema.nome_responsavel,
-        celular_responsavel=aluno_schema.numero_responsavel
+        celular_responsavel=aluno_schema.celular_responsavel
     )
     session.add(novo_aluno)
     session.flush()
@@ -110,16 +111,7 @@ async def atualizar_aluno(id_aluno: int,
     if not aluno:
         raise HTTPException(status_code=404, detail="Aluno inexistente!")
 
-    if aluno_update_schema.nome is not None:
-        aluno.nome = aluno_update_schema.nome
-    if aluno_update_schema.data_nascimento is not None:
-        aluno.data_nascimento = aluno_update_schema.data_nascimento
-    if aluno_update_schema.turma is not None:
-        aluno.turma = aluno_update_schema.turma
-    if aluno_update_schema.nome_responsavel is not None:
-        aluno.nome_responsavel = aluno_update_schema.nome_responsavel
-    if aluno_update_schema.numero_responsavel is not None:
-        aluno.celular_responsavel = aluno_update_schema.numero_responsavel
+    update_model(session=aluno, schema=aluno_update_schema)
 
     log = Log(
         id_usuario=usuario.id,
@@ -236,14 +228,7 @@ async def atualizar_turma(id_turma: int,
     if not turma:
         raise HTTPException(status_code=404, detail="Turma inexistente!")
 
-    if turma_update_schema.nome is not None:
-        turma.nome = turma_update_schema.nome
-    if turma_update_schema.serie is not None:
-        turma.serie = turma_update_schema.serie
-    if turma_update_schema.ano is not None:
-        turma.ano = turma_update_schema.ano
-    if turma_update_schema.turno is not None:
-        turma.turno = turma_update_schema.turno
+    update_model(session=turma, schema=turma_update_schema)
 
     log = Log(
         id_usuario=usuario.id,
