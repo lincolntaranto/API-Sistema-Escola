@@ -1,8 +1,8 @@
-"""Primeira versao
+"""primeira versao
 
-Revision ID: 21f1aa098699
+Revision ID: 2e472caf1dbf
 Revises: 
-Create Date: 2026-05-31 07:37:00.723131
+Create Date: 2026-06-01 14:30:56.758436
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '21f1aa098699'
+revision: str = '2e472caf1dbf'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -47,10 +47,11 @@ def upgrade() -> None:
     op.create_table('usuarios',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('nome', sa.String(length=100), nullable=False),
-    sa.Column('senha', sa.String(length=50), nullable=False),
+    sa.Column('senha', sa.String(length=100), nullable=False),
     sa.Column('cargo', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('numero', sa.String(length=100), nullable=False),
+    sa.Column('admin', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['cargo'], ['cargos.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

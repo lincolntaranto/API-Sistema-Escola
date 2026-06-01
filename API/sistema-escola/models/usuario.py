@@ -1,5 +1,5 @@
 from .base import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 
 
 class Usuario(Base):
@@ -11,3 +11,4 @@ class Usuario(Base):
     cargo = Column(ForeignKey("cargos.id"), nullable=False)
     email = Column(String(100), nullable=False)
     numero = Column(String(100), nullable=False)
+    admin = Column(Boolean, default=False, nullable=False)
