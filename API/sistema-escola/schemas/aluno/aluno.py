@@ -7,7 +7,7 @@ class AlunoSchema(BaseModel):
     data_nascimento: date
     turma: int
     nome_responsavel: str
-    numero_responsavel: str
+    celular_responsavel: str
 
     class Config:
         from_attributes = True
