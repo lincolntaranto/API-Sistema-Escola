@@ -197,3 +197,29 @@ async def cadastrar_turma(turma_schema: TurmaSchema,
         "ano": nova_turma.ano,
         "turno": nova_turma.turno
     }
+
+@management_router.delete("/apagar_turma")
+async def apagar_turma(id_turma: int,
+                       session: Session = Depends(get_session),
+                       usuario: Usuario = Depends(verificar_token)):
+    "Rota para apagar uma turma do sistema"
+
+    turma = session.query(Turma).filter(Turma.id == id_turma).first()
+    if not turma:
+        raise HTTPException(status_code=404, detail="ID de turma inexistente!")
+    session.delete(turma)
+    log = Log(
+        id_usuario=usuario.id,
+        acao="deletar_turma",
+        descricao=f"Turma {turma.nome}, de id {turma.id} foi deletada."
+    )
+    session.add(log)
+    session.commit()
+    return{
+        "mensagem": "Turma deletada com sucesso!",
+        "id": turma.id,
+        "nome": turma.nome,
+        "serie": turma.serie,
+        "turno": turma.turno,
+        "ano": turma.ano
+    }
