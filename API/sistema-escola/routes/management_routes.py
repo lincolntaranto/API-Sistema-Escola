@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from models.log import Log
 from models.session import get_session
-from models import Aluno, Usuario
+from models import Aluno, Usuario, Turma
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from security import verificar_token
@@ -134,4 +134,28 @@ async def atualizar_aluno(id_aluno: int,
         "mensagem": "Aluno atualizado com sucesso!",
         "id": aluno.id,
         "nome": aluno.nome
+    }
+
+@management_router.get("/turmas")
+async def mostrar_turmas(id_turma: int,
+                         session: Session = Depends(get_session),
+                         usuario: Usuario = Depends(verificar_token)):
+    """Rota para consultar turmas no sistema"""
+
+    turma = session.query(Turma).filter(Turma.id == id_turma).first()
+    if not turma:
+        raise HTTPException(status_code=404, detail="Turma inexistente!")
+    log = Log(
+        id_usuario=usuario.id,
+        #id_turma=turma.id, // adição futura
+        acao="consultar_turma",
+        descricao=f"Turma {turma.nome}, de ID {turma.id}, foi consultada."
+    )
+    session.add(log)
+    session.commit()
+    return{
+        "turma": turma.nome,
+        "serie": turma.serie,
+        "ano": turma.ano,
+        "turno": turma.turno
     }
