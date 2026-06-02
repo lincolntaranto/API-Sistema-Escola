@@ -47,3 +47,7 @@ def autenticar_usuario(email, senha, session):
     elif not verificar_senha(senha, usuario.senha):
         return False
     return usuario
+
+def verificar_autorizacao(usuario):
+    if not usuario.admin:
+        raise HTTPException(status_code=401, detail="Permissão insuficiente!")

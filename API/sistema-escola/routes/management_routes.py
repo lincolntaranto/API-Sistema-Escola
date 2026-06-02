@@ -10,7 +10,7 @@ from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
-from security import verificar_token
+from security import verificar_token, verificar_autorizacao
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -277,6 +277,7 @@ async def cadastrar_cargo(cargo_schema: CargoSchema,
                       usuario: Usuario = Depends(verificar_token)):
     """Rota para cadastrar um cargo no sistema."""
 
+    verificar_autorizacao(usuario)
     cargo = session.query(Cargo).filter(Cargo.nome == cargo_schema.nome).first()
 
     if cargo:
@@ -306,6 +307,7 @@ async def apagar_cargo(id_cargo: int,
                        usuario: Usuario = Depends(verificar_token)):
     """Rota para apagar um cargo do sistema."""
 
+    verificar_autorizacao(usuario)
     cargo = session.query(Cargo).filter(Cargo.id == id_cargo).first()
     if not cargo:
         raise HTTPException(status_code=404, detail="Cargo inexistente!")
@@ -330,6 +332,7 @@ async def atualizar_cargo(id_cargo: int,
                           usuario: Usuario = Depends(verificar_token)):
     """Rota para atualizar um cargo no sistema."""
 
+    verificar_autorizacao(usuario)
     cargo = session.get(Cargo, id_cargo)
     if not cargo:
         raise HTTPException(status_code=404, detail="Cargo inexistente!")
