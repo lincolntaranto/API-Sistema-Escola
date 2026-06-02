@@ -250,11 +250,32 @@ async def atualizar_turma(id_turma: int,
         "turno": turma.turno
     }
 
+@management_router.get("/cargos")
+async def mostrar_cargos(id_cargo: int,
+                         session: Session = Depends(get_session),
+                         usuario: Usuario = Depends(verificar_token)):
+    """Rota para consultar cargos no sistema."""
+
+    cargo = session.query(Cargo).filter(Cargo.id == id_cargo).first()
+
+    if not cargo:
+        raise HTTPException(status_code=404, detail="Cargo inexistente!")
+    log = Log(
+        id_usuario=usuario.id,
+        acao="consultar_cargo",
+        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi consultado."
+    )
+    session.add(log)
+    session.commit()
+    return{
+        "nome": cargo.nome
+    }
+
 @management_router.post("/cadastrar_cargo")
 async def cadastrar_cargo(cargo_schema: CargoSchema,
                       session: Session = Depends(get_session),
                       usuario: Usuario = Depends(verificar_token)):
-    """Rota para cadastrar um cargo no sistema"""
+    """Rota para cadastrar um cargo no sistema."""
 
     cargo = session.query(Cargo).filter(Cargo.nome == cargo_schema.nome).first()
 
@@ -278,3 +299,4 @@ async def cadastrar_cargo(cargo_schema: CargoSchema,
         "id": novo_cargo.id,
         "nome": novo_cargo.nome
     }
+
