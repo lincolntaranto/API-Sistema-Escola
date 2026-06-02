@@ -8,7 +8,7 @@ class AlunoUpdateSchema(BaseModel):
     data_nascimento: Optional[date] = None
     turma: Optional[int] = None
     nome_responsavel: Optional[str] = None
-    numero_responsavel: Optional[str] = None
+    celular_responsavel: Optional[str] = None
 
     class Config:
         from_attributes = True
