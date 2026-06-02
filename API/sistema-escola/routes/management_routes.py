@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 from crud import update_model
 from models.log import Log
 from models.session import get_session
-from models import Aluno, Usuario, Turma, usuario
+from models import Aluno, Usuario, Turma, usuario, Cargo
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
+from schemas.cargo import CargoSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
 from security import verificar_token
@@ -247,4 +248,33 @@ async def atualizar_turma(id_turma: int,
         "serie": turma.serie,
         "ano": turma.ano,
         "turno": turma.turno
+    }
+
+@management_router.post("/cadastrar_cargo")
+async def cadastrar_cargo(cargo_schema: CargoSchema,
+                      session: Session = Depends(get_session),
+                      usuario: Usuario = Depends(verificar_token)):
+    """Rota para cadastrar um cargo no sistema"""
+
+    cargo = session.query(Cargo).filter(Cargo.nome == cargo_schema.nome).first()
+
+    if cargo:
+        raise HTTPException(status_code=400, detail="Cargo já cadastrado!")
+    novo_cargo = Cargo(
+        nome=cargo_schema.nome
+    )
+    session.add(novo_cargo)
+    session.flush()
+    log = Log(
+        id_usuario=usuario.id,
+        acao="cadastrar_cargo",
+        descricao=f"Cargo {novo_cargo.nome}, de ID {novo_cargo.id}, foi cadastrado!"
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(novo_cargo)
+    return {
+        "mensagem": "Cargo cadastrado com sucesso!",
+        "id": novo_cargo.id,
+        "nome": novo_cargo.nome
     }
