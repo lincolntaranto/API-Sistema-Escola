@@ -323,3 +323,28 @@ async def apagar_cargo(id_cargo: int,
         "nome": cargo.nome
     }
 
+@management_router.patch("/atualizar_cargo")
+async def atualizar_cargo(id_cargo: int,
+                          cargo_schema: CargoSchema,
+                          session: Session = Depends(get_session),
+                          usuario: Usuario = Depends(verificar_token)):
+    """Rota para atualizar um cargo no sistema."""
+
+    cargo = session.get(Cargo, id_cargo)
+    if not cargo:
+        raise HTTPException(status_code=404, detail="Cargo inexistente!")
+    update_model(session=cargo, schema=cargo_schema)
+
+    log = Log(
+        id_usuario=usuario.id,
+        acao="atualizar_cargo",
+        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi atualizado."
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(cargo)
+
+    return {
+        "mensagem": "Cargo atualizado com sucesso!",
+        "id": cargo.id
+    }
