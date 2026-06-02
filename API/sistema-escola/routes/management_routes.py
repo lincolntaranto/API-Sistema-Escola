@@ -196,7 +196,7 @@ async def cadastrar_turma(turma_schema: TurmaSchema,
 async def apagar_turma(id_turma: int,
                        session: Session = Depends(get_session),
                        usuario: Usuario = Depends(verificar_token)):
-    "Rota para apagar uma turma do sistema"
+    """Rota para apagar uma turma do sistema."""
 
     turma = session.query(Turma).filter(Turma.id == id_turma).first()
     if not turma:
@@ -298,5 +298,28 @@ async def cadastrar_cargo(cargo_schema: CargoSchema,
         "mensagem": "Cargo cadastrado com sucesso!",
         "id": novo_cargo.id,
         "nome": novo_cargo.nome
+    }
+
+@management_router.delete("/apagar_cargo")
+async def apagar_cargo(id_cargo: int,
+                       session: Session = Depends(get_session),
+                       usuario: Usuario = Depends(verificar_token)):
+    """Rota para apagar um cargo do sistema."""
+
+    cargo = session.query(Cargo).filter(Cargo.id == id_cargo).first()
+    if not cargo:
+        raise HTTPException(status_code=404, detail="Cargo inexistente!")
+    session.delete(cargo)
+    log = Log(
+        id_usuario=usuario.id,
+        acao="deletar_cargo",
+        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi deletado."
+    )
+    session.add(log)
+    session.commit()
+    return{
+        "mensagem": "Cargo deletado com sucesso!",
+        "id": cargo.id,
+        "nome": cargo.nome
     }
 
