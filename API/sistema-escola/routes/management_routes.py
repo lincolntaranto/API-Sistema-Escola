@@ -8,6 +8,7 @@ from models import Aluno, Usuario, Turma, usuario, Cargo, Nota
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
+from schemas.nota.nota import NotaSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
 from security import verificar_token, verificar_autorizacao
@@ -381,3 +382,43 @@ async def mostrar_notas(id_aluno: int,
            "bimestre": nota.bimestre,
            "nota": nota.nota}
 
+
+@management_router.post("/cadastrar_nota")
+async def cadastrar_nota(nota_schema: NotaSchema,
+                         session: Session = Depends(get_session),
+                         usuario: Usuario = Depends(verificar_token)):
+    """Rota para cadastrar nota de um aluno no sistema."""
+
+    nota= session.query(Nota).filter(Nota.aluno == nota_schema.aluno,
+                                     Nota.materia == nota_schema.materia,
+                                     Nota.bimestre == nota_schema.bimestre).first()
+    if nota:
+        raise HTTPException(status_code=400, detail=f"A nota de {nota_schema.materia} do bimestre {nota_schema.bimestre}"
+                                                    f"já foi cadastrada, se ela foi inserida errada, por favor use a rota"
+                                                    f"de atualização para muda-la.")
+    nova_nota = Nota(
+        aluno=nota_schema.aluno,
+        materia=nota_schema.materia,
+        nota=nota_schema.nota,
+        bimestre=nota_schema.bimestre
+    )
+    session.add(nova_nota)
+    session.flush()
+    log = Log(
+        id_usuario=usuario.id,
+        id_aluno=nova_nota.aluno,
+        acao="cadastrar_nota",
+        descricao=f"Nota de ID {nova_nota.id} da materia {nova_nota.materia} e do bimestre {nova_nota.bimestre} foi"
+                  f"cadastrada."
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(nova_nota)
+    return{
+        "mensagem": "Nota cadastrada com sucesso!",
+        "id": nova_nota.id,
+        "id_aluno": nova_nota.aluno,
+        "materia": nova_nota.materia,
+        "bimestre": nova_nota.bimestre,
+        "nota": nova_nota.nota
+    }
