@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from crud import update_model
 from models.log import Log
 from models.session import get_session
-from models import Aluno, Usuario, Turma, usuario, Cargo
+from models import Aluno, Usuario, Turma, usuario, Cargo, Nota
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
@@ -351,3 +351,33 @@ async def atualizar_cargo(id_cargo: int,
         "mensagem": "Cargo atualizado com sucesso!",
         "id": cargo.id
     }
+
+@management_router.get("/notas")
+async def mostrar_notas(id_aluno: int,
+                        materia: str,
+                        bimestre: int,
+                        session: Session = Depends(get_session),
+                        usuario: Usuario = Depends(verificar_token)):
+    """"Rota para consultar notas de alunos no sistema."""
+
+    aluno = session.query(Aluno).filter(Aluno.id == id_aluno).first()
+    nota = session.query(Nota).filter(Nota.aluno == id_aluno,
+                                      Nota.materia == materia,
+                                      Nota.bimestre == bimestre).first()
+    if not aluno:
+        raise HTTPException(status_code=404, detail="ID de aluno inexistente!")
+    if not nota:
+        raise HTTPException(status_code=404, detail="Esse aluno não possui notas registradas!")
+    log = Log(
+        id_usuario=usuario.id,
+        id_aluno=aluno.id,
+        acao="consultar_nota",
+        descricao=f"Aluno {aluno.nome}, da turma {aluno.turma} teve a nota consultada."
+        )
+    session.add(log)
+    session.commit()
+    return{"nome": nota.aluno,
+           "materia": nota.materia,
+           "bimestre": nota.bimestre,
+           "nota": nota.nota}
+
