@@ -10,3 +10,4 @@ class Nota(Base):
     materia = Column(String(100), nullable=False)
     nota = Column(Float)
     bimestre = Column(Integer, nullable=False)
+    ano = Column(Integer, nullable=False)

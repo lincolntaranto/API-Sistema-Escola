@@ -8,6 +8,7 @@ class NotaSchema(BaseModel):
     materia: Optional[str]
     nota: Optional[float]
     bimestre: Optional[int]
+    ano: Optional[int]
 
     class Config:
         from_attributes = True

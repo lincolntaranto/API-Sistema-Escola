@@ -5,6 +5,7 @@ class NotaSchema(BaseModel):
     materia: str
     nota: float
     bimestre: int
+    ano: int
 
     class Config:
         from_attributes = True

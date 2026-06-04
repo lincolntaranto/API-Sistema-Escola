@@ -357,6 +357,7 @@ async def atualizar_cargo(id_cargo: int,
 async def mostrar_notas(id_aluno: int,
                         materia: str,
                         bimestre: int,
+                        ano: int,
                         session: Session = Depends(get_session),
                         usuario: Usuario = Depends(verificar_token)):
     """"Rota para consultar notas de alunos no sistema."""
@@ -364,7 +365,8 @@ async def mostrar_notas(id_aluno: int,
     aluno = session.query(Aluno).filter(Aluno.id == id_aluno).first()
     nota = session.query(Nota).filter(Nota.aluno == id_aluno,
                                       Nota.materia == materia,
-                                      Nota.bimestre == bimestre).first()
+                                      Nota.bimestre == bimestre,
+                                      Nota.ano == bimestre).first()
     if not aluno:
         raise HTTPException(status_code=404, detail="ID de aluno inexistente!")
     if not nota:
@@ -378,6 +380,7 @@ async def mostrar_notas(id_aluno: int,
     session.add(log)
     session.commit()
     return{"nome": nota.aluno,
+           "ano": nota.ano,
            "materia": nota.materia,
            "bimestre": nota.bimestre,
            "nota": nota.nota}
@@ -391,7 +394,8 @@ async def cadastrar_nota(nota_schema: NotaSchema,
 
     nota= session.query(Nota).filter(Nota.aluno == nota_schema.aluno,
                                      Nota.materia == nota_schema.materia,
-                                     Nota.bimestre == nota_schema.bimestre).first()
+                                     Nota.bimestre == nota_schema.bimestre,
+                                     Nota.ano == nota_schema.ano).first()
     if nota:
         raise HTTPException(status_code=400, detail=f"A nota de {nota_schema.materia} do bimestre {nota_schema.bimestre}"
                                                     f"já foi cadastrada, se ela foi inserida errada, por favor use a rota"
@@ -408,8 +412,8 @@ async def cadastrar_nota(nota_schema: NotaSchema,
         id_usuario=usuario.id,
         id_aluno=nova_nota.aluno,
         acao="cadastrar_nota",
-        descricao=f"Nota de ID {nova_nota.id} da materia {nova_nota.materia} e do bimestre {nova_nota.bimestre} foi"
-                  f"cadastrada."
+        descricao=f"Nota de ID {nova_nota.id} da materia {nova_nota.materia}, do bimestre {nova_nota.bimestre} e do ano"
+                  f" {nova_nota.ano}, foi cadastrada."
     )
     session.add(log)
     session.commit()
@@ -418,6 +422,7 @@ async def cadastrar_nota(nota_schema: NotaSchema,
         "mensagem": "Nota cadastrada com sucesso!",
         "id": nova_nota.id,
         "id_aluno": nova_nota.aluno,
+        "ano": nova_nota.ano,
         "materia": nova_nota.materia,
         "bimestre": nova_nota.bimestre,
         "nota": nova_nota.nota
