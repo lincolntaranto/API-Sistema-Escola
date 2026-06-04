@@ -366,7 +366,7 @@ async def mostrar_notas(id_aluno: int,
     nota = session.query(Nota).filter(Nota.aluno == id_aluno,
                                       Nota.materia == materia,
                                       Nota.bimestre == bimestre,
-                                      Nota.ano == bimestre).first()
+                                      Nota.ano == ano).first()
     if not aluno:
         raise HTTPException(status_code=404, detail="ID de aluno inexistente!")
     if not nota:
@@ -404,7 +404,8 @@ async def cadastrar_nota(nota_schema: NotaSchema,
         aluno=nota_schema.aluno,
         materia=nota_schema.materia,
         nota=nota_schema.nota,
-        bimestre=nota_schema.bimestre
+        bimestre=nota_schema.bimestre,
+        ano=nota_schema.ano
     )
     session.add(nova_nota)
     session.flush()
