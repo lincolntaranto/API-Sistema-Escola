@@ -4,11 +4,11 @@ from typing import Optional
 
 
 class NotaUpdateSchema(BaseModel):
-    aluno: Optional[int]
-    materia: Optional[str]
-    nota: Optional[float]
-    bimestre: Optional[int]
-    ano: Optional[int]
+    aluno: Optional[int] = None
+    materia: Optional[str] = None
+    nota: Optional[float] = None
+    bimestre: Optional[int] = None
+    ano: Optional[int] = None
 
     class Config:
         from_attributes = True
