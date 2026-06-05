@@ -9,6 +9,7 @@ from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
 from schemas.nota.nota import NotaSchema
+from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
 from security import verificar_token, verificar_autorizacao
@@ -427,4 +428,37 @@ async def cadastrar_nota(nota_schema: NotaSchema,
         "materia": nova_nota.materia,
         "bimestre": nova_nota.bimestre,
         "nota": nova_nota.nota
+    }
+
+@management_router.patch("/atualizar_nota")
+async def atualizar_nota(id_nota: int,
+                         nota_update_schema: NotaUpdateSchema,
+                         session: Session = Depends(get_session),
+                         usuario: Usuario = Depends(verificar_token)):
+    """Rota para atualizar uma nota do sistema."""
+    nota = session.get(Nota, id_nota)
+    if not nota:
+        raise HTTPException(status_code=404, detail="Nota inexistente!")
+
+    update_model(session=nota, schema=nota_update_schema)
+
+    log = Log(
+        id_usuario=usuario.id,
+        id_aluno=nota.aluno,
+        acao="atualizar_nota",
+        descricao=f"Nota de ID {nota.id}, da materia {nota.materia} e do bimestre {nota.bimestre}, foi atualizada."
+    )
+
+    session.add(log)
+    session.commit()
+    session.refresh(nota)
+
+    return{
+        "mensagem": "Nota atualizada com sucesso!",
+        "id": nota.id,
+        "aluno_id": nota.aluno,
+        "ano": nota.ano,
+        "materia": nota.materia,
+        "bimestre": nota.bimestre,
+        "nota": nota.nota
     }

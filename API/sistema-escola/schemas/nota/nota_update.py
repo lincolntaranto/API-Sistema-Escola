@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-class NotaSchema(BaseModel):
+class NotaUpdateSchema(BaseModel):
     aluno: Optional[int]
     materia: Optional[str]
     nota: Optional[float]
