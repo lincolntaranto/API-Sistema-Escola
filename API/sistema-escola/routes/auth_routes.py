@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from schemas.login import LoginSchema
-from security import hash_senha, autenticar_usuario, verificar_token
+from security import hash_senha, autenticar_usuario, verificar_token, verificar_convite
 from security import criar_token
 
 from models import Usuario
@@ -27,11 +27,12 @@ async def criar_conta(usuario_schema: UsuarioSchema, session: Session = Depends(
     if usuario:
         raise HTTPException(status_code=400, detail="email já cadastrado!")
     else:
+        cargo = int(verificar_convite(usuario_schema.convite, session))
         senha_criptografada = hash_senha(usuario_schema.senha)
         novo_usuario = Usuario(
             nome = usuario_schema.nome,
             senha = senha_criptografada,
-            cargo = usuario_schema.cargo,
+            cargo = cargo,
             email = usuario_schema.email,
             numero = usuario_schema.numero)
         session.add(novo_usuario)

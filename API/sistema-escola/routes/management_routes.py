@@ -2,17 +2,19 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from crud import update_model
+from models.convites import Convite
 from models.log import Log
 from models.session import get_session
 from models import Aluno, Usuario, Turma, usuario, Cargo, Nota
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
+from schemas.convite import ConviteSchema
 from schemas.nota.nota import NotaSchema
 from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
-from security import verificar_token, verificar_autorizacao
+from security import verificar_token, verificar_autorizacao, criar_convite
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -461,4 +463,34 @@ async def atualizar_nota(id_nota: int,
         "materia": nota.materia,
         "bimestre": nota.bimestre,
         "nota": nota.nota
+    }
+
+@management_router.post("/cadastrar_convite")
+async def cadastrar_convite(convite_schema: ConviteSchema,
+                            session: Session = Depends(get_session),
+                            usuario: Usuario = Depends(verificar_token)):
+    """Rota para cadastrar um convite no sistema."""
+
+    verificar_autorizacao(usuario)
+    cargo = session.query(Cargo).filter(Cargo.id == convite_schema.id_cargo).first()
+
+    if not cargo:
+        raise HTTPException(status_code=404, detail="Cargo inexistente!")
+
+    novo_convite = Convite()
+    session.add(novo_convite)
+    session.flush()
+    token_convite = criar_convite(convite_schema.id_cargo, novo_convite.id)
+    log = Log(
+        id_usuario=usuario.id,
+        acao="cadastrar_convite",
+        descricao=f"Convite para o cargo de ID {convite_schema.id_cargo} foi cadastrado!"
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(novo_convite)
+    return{
+        "mensagem": "Convite criado com sucesso!",
+        "convite_token": token_convite,
+        "id_cargo": convite_schema.id_cargo
     }
