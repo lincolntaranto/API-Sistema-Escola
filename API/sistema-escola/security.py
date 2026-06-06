@@ -2,13 +2,14 @@ import bcrypt
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, oauth2_schema
-from models import Usuario
+from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, oauth2_schema, INVITE_EXPIRE_MINUTES
+from models import Usuario, Cargo
 
 from jose import jwt, JWTError
 
 from datetime import datetime, timedelta, timezone
 
+from models.convites import Convite
 from models.session import get_session
 
 
@@ -51,3 +52,32 @@ def autenticar_usuario(email, senha, session):
 def verificar_autorizacao(usuario):
     if not usuario.admin:
         raise HTTPException(status_code=401, detail="Permissão insuficiente!")
+
+
+def criar_convite(id_cargo, id_convite, duracao_convite=timedelta(int(INVITE_EXPIRE_MINUTES))):
+    data_expiracao = datetime.now(timezone.utc) + duracao_convite
+    dict_info = {
+        "id": str(id_convite),
+        "cargo": str(id_cargo),
+        "exp": data_expiracao
+    }
+    jwt_encoded = jwt.encode(dict_info, SECRET_KEY, ALGORITHM)
+    return jwt_encoded
+
+def verificar_convite(token: str, session: Session):
+    try:
+        dict_info = jwt.decode(token, SECRET_KEY, ALGORITHM)
+        id_convite = int(dict_info.get("id"))
+        id_cargo = int(dict_info.get("cargo"))
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Convite invalido!")
+    cargo = session.query(Cargo).filter(Cargo.id == id_cargo).first()
+    if not cargo:
+        raise HTTPException(status_code=401, detail="Cargo invalido!")
+    usado = session.query(Convite).filter(Convite.id == id_convite,
+                                          Convite.usado == True).first()
+    if usado:
+        raise HTTPException(status_code=401, detail="Convite já usado!")
+    convite_valido = session.query(Convite).filter(Convite.id == id_convite).first()
+    convite_valido.usado = True
+    return cargo.id

@@ -5,6 +5,7 @@ from .turma import Turma
 from .usuario import Usuario
 from .log import Log
 from .base import Base
+from .convites import Convite
 
 __all__ = [
     "Aluno",
@@ -13,5 +14,6 @@ __all__ = [
     "Turma",
     "Usuario",
     "Log",
-    "Base"
+    "Base",
+    "Convite"
 ]
