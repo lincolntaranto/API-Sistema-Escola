@@ -11,4 +11,4 @@ class Aluno(Base):
     turma = Column(ForeignKey("turmas.id"))
     nome_responsavel = Column(String, nullable=False)
     celular_responsavel = Column(String, nullable=False)
-    deletado = Column(Boolean, default=False, nullable=False)
+    deletado = Column(Boolean, default=False, nullable=False, server_default="false")
