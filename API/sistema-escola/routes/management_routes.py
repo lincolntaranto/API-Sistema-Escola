@@ -25,7 +25,7 @@ async def mostrar_alunos(id_aluno: int,
     """"Rota para consultar alunos registrados no sistema."""
 
     aluno = session.query(Aluno).filter(Aluno.id == id_aluno).first()
-    if not aluno:
+    if not aluno or aluno.deletado:
         raise HTTPException(status_code=404, detail="ID de aluno inexistente!")
     log = Log(
         id_usuario=usuario.id,
@@ -88,7 +88,10 @@ async def apagar_aluno(id_aluno: int,
     aluno = session.query(Aluno).filter(Aluno.id == id_aluno).first()
     if not aluno:
         raise HTTPException(status_code=404, detail="ID de aluno inexistente!")
-    session.delete(aluno)
+    if aluno.deletado:
+        raise HTTPException(status_code=400, detail="Aluno já foi deletado!")
+    aluno.deletado = True
+    session.add(aluno)
     log = Log(
         id_usuario=usuario.id,
         id_aluno=aluno.id,
