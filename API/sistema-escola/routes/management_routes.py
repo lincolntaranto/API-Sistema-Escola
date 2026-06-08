@@ -116,7 +116,7 @@ async def atualizar_aluno(id_aluno: int,
     """Rota para atualizar um aluno do sistema."""
 
     aluno = session.get(Aluno, id_aluno)
-    if not aluno:
+    if not aluno or aluno.deletado:
         raise HTTPException(status_code=404, detail="Aluno inexistente!")
 
     update_model(session=aluno, schema=aluno_update_schema)
