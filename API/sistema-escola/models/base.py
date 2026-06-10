@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 import os
 
@@ -12,5 +12,6 @@ if not db_url:
 
 db = create_engine(db_url)
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
