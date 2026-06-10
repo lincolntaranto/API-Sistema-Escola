@@ -51,6 +51,9 @@ async def cadastrar_aluno(aluno_schema: AlunoSchema,
     aluno= session.query(Aluno).filter(Aluno.nome == aluno_schema.nome,
                                        Aluno.data_nascimento == aluno_schema.data_nascimento,
                                        Aluno.nome_responsavel == aluno_schema.nome_responsavel).first()
+    turma = session.query(Turma).filter(Turma.id == aluno_schema.turma).first()
+    if not turma:
+        raise HTTPException(status_code=404, detail="Turma inexistente!")
     if aluno:
         raise HTTPException(status_code=400, detail="Aluno já cadastrado")
     novo_aluno = Aluno(
