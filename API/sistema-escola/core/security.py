@@ -2,7 +2,7 @@ import bcrypt
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, oauth2_schema, INVITE_EXPIRE_MINUTES
+from core.config import settings, oauth2_schema
 from models import Usuario, Cargo
 
 from jose import jwt, JWTError
@@ -21,18 +21,18 @@ def verificar_senha(senha: str, hash: str) -> bool:
 
 ALGORITHM = "HS256"
 
-def criar_token(id_usuario, duracao_token=timedelta(int(ACCESS_TOKEN_EXPIRE_MINUTES))):
+def criar_token(id_usuario, duracao_token=timedelta(int(settings.ACCESS_TOKEN_EXPIRE_MINUTES))):
     data_expiracao = datetime.now(timezone.utc) + duracao_token
     dic_info = {
         "sub" : str(id_usuario),
         "exp" : data_expiracao
     }
-    jwt_encoded = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
+    jwt_encoded = jwt.encode(dic_info, settings.SECRET_KEY, ALGORITHM)
     return jwt_encoded
 
 def verificar_token(token: str = Depends(oauth2_schema), session: Session = Depends(get_session)):
     try:
-        dict_info = jwt.decode(token, SECRET_KEY, ALGORITHM)
+        dict_info = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
         id_usuario = int(dict_info.get("sub"))
     except JWTError:
         raise HTTPException(status_code=401, detail="Acesso negado!")
@@ -54,19 +54,19 @@ def verificar_autorizacao(usuario):
         raise HTTPException(status_code=401, detail="Permissão insuficiente!")
 
 
-def criar_convite(id_cargo, id_convite, duracao_convite=timedelta(int(INVITE_EXPIRE_MINUTES))):
+def criar_convite(id_cargo, id_convite, duracao_convite=timedelta(int(settings.INVITE_EXPIRE_MINUTES))):
     data_expiracao = datetime.now(timezone.utc) + duracao_convite
     dict_info = {
         "id": str(id_convite),
         "cargo": str(id_cargo),
         "exp": data_expiracao
     }
-    jwt_encoded = jwt.encode(dict_info, SECRET_KEY, ALGORITHM)
+    jwt_encoded = jwt.encode(dict_info, settings.SECRET_KEY, ALGORITHM)
     return jwt_encoded
 
 def verificar_convite(token: str, session: Session):
     try:
-        dict_info = jwt.decode(token, SECRET_KEY, ALGORITHM)
+        dict_info = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
         id_convite = int(dict_info.get("id"))
         id_cargo = int(dict_info.get("cargo"))
     except JWTError:

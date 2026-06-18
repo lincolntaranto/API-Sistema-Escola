@@ -5,7 +5,7 @@ from crud import update_model
 from models.convites import Convite
 from models.log import Log
 from models.session import get_session
-from models import Aluno, Usuario, Turma, usuario, Cargo, Nota
+from models import Aluno, Usuario, Turma, Cargo, Nota
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
@@ -14,7 +14,7 @@ from schemas.nota.nota import NotaSchema
 from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
-from security import verificar_token, verificar_autorizacao, criar_convite
+from core.security import verificar_token, verificar_autorizacao, criar_convite
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
