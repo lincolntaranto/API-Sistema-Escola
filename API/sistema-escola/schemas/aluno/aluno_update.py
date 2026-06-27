@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+
 class AlunoUpdateSchema(BaseModel):
     nome: Optional[str] = None
     data_nascimento: Optional[date] = None

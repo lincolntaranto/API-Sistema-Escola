@@ -3,6 +3,7 @@ from .base import db
 
 SessionLocal = sessionmaker(bind=db)
 
+
 def get_session():
     session = SessionLocal()
     try:

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DATE, Boolean
 
 from .base import Base
 
+
 class Aluno(Base):
     __tablename__ = "alunos"
 

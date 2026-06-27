@@ -1,8 +1,7 @@
 from fastapi.security import OAuth2PasswordBearer
-from dotenv import load_dotenv
-import os
 
 from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -11,6 +10,7 @@ class Settings(BaseSettings):
     INVITE_EXPIRE_MINUTES: str
 
     model_config = {"env_file": ".env"}
+
 
 settings = Settings()
 

@@ -1,13 +1,15 @@
 import enum
 
-from sqlalchemy import Column, Integer, String, DATETIME, Enum
+from sqlalchemy import Column, Integer, String, Enum
 
 from .base import Base
+
 
 class Turnos(enum.Enum):
     manha = "manhã"
     tarde = "tarde"
     noite = "noite"
+
 
 class Turma(Base):
     __tablename__ = "turmas"

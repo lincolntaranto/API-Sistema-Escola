@@ -2,6 +2,7 @@ from datetime import date
 
 from pydantic import BaseModel
 
+
 class AlunoSchema(BaseModel):
     nome: str
     data_nascimento: date

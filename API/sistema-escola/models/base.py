@@ -12,6 +12,6 @@ if not db_url:
 
 db = create_engine(db_url)
 
+
 class Base(DeclarativeBase):
     pass
-

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class NotaSchema(BaseModel):
     aluno: int
     materia: str
