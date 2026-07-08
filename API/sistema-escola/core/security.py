@@ -81,9 +81,7 @@ def verificar_convite(token: str, session: Session):
     if not cargo:
         raise HTTPException(status_code=401, detail="Cargo invalido!")
     usado = (
-        session.query(Convite)
-        .filter(Convite.id == id_convite, Convite.usado(True))
-        .first()
+        session.query(Convite).filter(Convite.id == id_convite, Convite.usado).first()
     )
     if usado:
         raise HTTPException(status_code=401, detail="Convite já usado!")
