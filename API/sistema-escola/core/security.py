@@ -1,4 +1,3 @@
-import bcrypt
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -7,18 +6,39 @@ from models import Usuario, Cargo
 
 from jose import jwt, JWTError
 
+from pwdlib import PasswordHash
+
 from datetime import datetime, timedelta, timezone
 
 from models.convites import Convite
 from models.session import get_session
 
-
-def hash_senha(senha: str) -> str:
-    return bcrypt.hashpw(senha.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+password_hash = PasswordHash.recommended()
 
 
-def verificar_senha(senha: str, hash: str) -> bool:
-    return bcrypt.checkpw(senha.encode("utf-8"), hash.encode("utf-8"))
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Compara a senha enviada com a senha hasheada.
+
+    Args:
+        plain_password (str): senha não hasheada enviado pelo usuário.
+        hashed_password (str): senha hasheada no BD.
+
+    Returns:
+        bool: Retorna True ou False..
+    """
+    return password_hash.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str) -> str:
+    """Pega a senha enviada pelo usuário, hasheia e retorna o hash da senha.
+
+    Args:
+        password (str): senha enviada pelo usuário.
+
+    Returns:
+        str: senha hasheada.
+    """
+    return password_hash.hash(password)
 
 
 ALGORITHM = "HS256"
@@ -51,7 +71,7 @@ def autenticar_usuario(email, senha, session):
     usuario = session.query(Usuario).filter(Usuario.email == email).first()
     if not usuario:
         return False
-    elif not verificar_senha(senha, usuario.senha):
+    elif not verify_password(senha, usuario.senha):
         return False
     return usuario
 

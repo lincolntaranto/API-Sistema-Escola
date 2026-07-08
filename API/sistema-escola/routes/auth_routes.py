@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from schemas.login import LoginSchema
 from core.security import (
-    hash_senha,
+    get_password_hash,
     autenticar_usuario,
     verificar_token,
     verificar_convite,
@@ -39,7 +39,7 @@ async def criar_conta(
         raise HTTPException(status_code=400, detail="email já cadastrado!")
     else:
         cargo = int(verificar_convite(usuario_schema.convite, session))
-        senha_criptografada = hash_senha(usuario_schema.senha)
+        senha_criptografada = get_password_hash(usuario_schema.senha)
         novo_usuario = Usuario(
             nome=usuario_schema.nome,
             senha=senha_criptografada,
