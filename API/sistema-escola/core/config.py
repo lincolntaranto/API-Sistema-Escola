@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: str
     INVITE_EXPIRE_MINUTES: str
+    INITIAL_PASSWORD: str
+    INITIAL_EMAIL: str
 
     model_config = {"env_file": ".env"}
 
