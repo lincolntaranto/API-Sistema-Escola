@@ -2,7 +2,9 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
-from models import Cargo, Turma, Aluno
+from core.config import settings
+from core.security import get_password_hash
+from models import Cargo, Turma, Aluno, Usuario
 from models.session import SessionLocal
 
 
@@ -14,6 +16,27 @@ def popular_cargos(session: Session):
         print("Cargo inicial criado com sucesso!")
     else:
         print("Já existe um cargo no sistema!")
+
+
+def create_initial_superuser(session: Session):
+    """Função para criar primeiro usuário ADMIN."""
+    password = settings.INITIAL_PASSWORD
+    hash_senha = get_password_hash(password)
+    if session.query(Usuario).count() == 0:
+        session.add(
+            Usuario(
+                nome="Omega",
+                senha=hash_senha,
+                cargo=1,
+                email=settings.INITIAL_EMAIL,
+                numero="123",
+                admin=True,
+            )
+        )
+        session.commit()
+        print("Super usuário inicial criado com sucesso!")
+    else:
+        print("Já existe uma conta inicial no sistema!")
 
 
 def popular_turmas(session: Session):
@@ -49,5 +72,6 @@ def popular_alunos(session: Session):
 if __name__ == "__main__":
     with SessionLocal() as session:
         popular_cargos(session)
+        create_initial_superuser(session)
         popular_turmas(session)
         popular_alunos(session)
