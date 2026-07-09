@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from core.config import settings, oauth2_schema
 from models import Usuario, Cargo
 
-from jose import jwt, JWTError
+import jwt
+from jwt import InvalidTokenError
 
 from pwdlib import PasswordHash
 
@@ -59,7 +60,7 @@ def verificar_token(
     try:
         dict_info = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
         id_usuario = int(dict_info.get("sub"))
-    except JWTError:
+    except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Acesso negado!")
     usuario = session.query(Usuario).filter(Usuario.id == id_usuario).first()
     if not usuario:
@@ -95,7 +96,7 @@ def verificar_convite(token: str, session: Session):
         dict_info = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
         id_convite = int(dict_info.get("id"))
         id_cargo = int(dict_info.get("cargo"))
-    except JWTError:
+    except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Convite invalido!")
     cargo = session.query(Cargo).filter(Cargo.id == id_cargo).first()
     if not cargo:
