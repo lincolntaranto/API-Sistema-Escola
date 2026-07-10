@@ -8,7 +8,3 @@ class TurmaSchema(BaseModel):
     serie: str
     ano: int
     turno: Turnos
-
-
-class Config:
-    from_attributes = True

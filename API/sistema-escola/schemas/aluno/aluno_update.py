@@ -10,6 +10,3 @@ class AlunoUpdateSchema(BaseModel):
     turma: Optional[int] = None
     nome_responsavel: Optional[str] = None
     celular_responsavel: Optional[str] = None
-
-    class Config:
-        from_attributes = True

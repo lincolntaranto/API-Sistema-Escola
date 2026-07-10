@@ -9,6 +9,3 @@ class AlunoSchema(BaseModel):
     turma: int
     nome_responsavel: str
     celular_responsavel: str
-
-    class Config:
-        from_attributes = True

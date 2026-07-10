@@ -9,6 +9,3 @@ class NotaUpdateSchema(BaseModel):
     nota: Optional[float] = None
     bimestre: Optional[int] = None
     ano: Optional[int] = None
-
-    class Config:
-        from_attributes = True

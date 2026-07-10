@@ -1,12 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class UsuarioSchema(BaseModel):
     nome: str
     senha: str
     convite: str
-    email: str
+    email: EmailStr
     numero: str
-
-    class Config:
-        from_attributes = True
