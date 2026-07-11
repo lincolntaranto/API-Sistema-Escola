@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from crud import update_model
+from core.crud import update_model
 from models.convites import Convite
 from models.log import Log
 from models.session import get_session
