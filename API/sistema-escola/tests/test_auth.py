@@ -47,7 +47,6 @@ def test_login(client, invite):
 
 
 def test_login_email_wrong(client, invite):
-    criar_usuario_padrao(client, invite)
     response = client.post(
         "/auth/login", json={"email": "wrongemail@email.com", "senha": "123"}
     )
