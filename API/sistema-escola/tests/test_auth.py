@@ -1,5 +1,5 @@
-def test_create_user(client, invite):
-    response = client.post(
+def criar_usuario_padrao(client, invite):
+    return client.post(
         "/auth/criar_conta",
         json={
             "nome": "Teste",
@@ -10,6 +10,10 @@ def test_create_user(client, invite):
             "convite": invite,
         },
     )
+
+
+def test_create_user(client, invite):
+    response = criar_usuario_padrao(client, invite)
     assert response.status_code == 200
 
 
@@ -26,3 +30,9 @@ def test_create_user_wrong_email(client, invite):
         },
     )
     assert response.status_code == 422
+
+
+def test_create_user_duplicate_email(client, invite):
+    criar_usuario_padrao(client, invite)
+    response = criar_usuario_padrao(client, invite)
+    assert response.status_code == 400
