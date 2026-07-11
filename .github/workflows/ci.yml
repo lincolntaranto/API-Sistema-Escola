@@ -7,6 +7,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: API/sistema-escola
 
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
