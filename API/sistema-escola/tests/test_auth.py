@@ -44,3 +44,11 @@ def test_login(client, invite):
         "/auth/login", json={"email": "pyteste@email.com", "senha": "123"}
     )
     assert response.status_code == 200
+
+
+def test_login_email_wrong(client, invite):
+    criar_usuario_padrao(client, invite)
+    response = client.post(
+        "/auth/login", json={"email": "wrongemail@email.com", "senha": "123"}
+    )
+    assert response.status_code == 400
