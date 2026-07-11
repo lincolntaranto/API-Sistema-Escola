@@ -36,3 +36,11 @@ def test_create_user_duplicate_email(client, invite):
     criar_usuario_padrao(client, invite)
     response = criar_usuario_padrao(client, invite)
     assert response.status_code == 400
+
+
+def test_login(client, invite):
+    criar_usuario_padrao(client, invite)
+    response = client.post(
+        "/auth/login", json={"email": "pyteste@email.com", "senha": "123"}
+    )
+    assert response.status_code == 200
