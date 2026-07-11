@@ -5,7 +5,12 @@ from starlette.testclient import TestClient
 from testcontainers.postgres import PostgresContainer
 
 from core.config import settings
-from dados_iniciais import popular_cargos, create_initial_superuser
+from dados_iniciais import (
+    popular_cargos,
+    create_initial_superuser,
+    popular_alunos,
+    popular_turmas,
+)
 from main import app
 from models.base import Base
 from models.session import get_session
@@ -57,6 +62,18 @@ def cargo(test_engine):
 def super_user(test_engine):
     with Session(test_engine) as session:
         create_initial_superuser(session=session)
+
+
+@pytest.fixture(autouse=True)
+def classroom(test_engine):
+    with Session(test_engine) as session:
+        popular_turmas(session=session)
+
+
+@pytest.fixture(autouse=True)
+def student(test_engine):
+    with Session(test_engine) as session:
+        popular_alunos(session=session)
 
 
 @pytest.fixture()
