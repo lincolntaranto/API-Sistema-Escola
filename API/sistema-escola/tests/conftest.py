@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 from starlette.testclient import TestClient
 from testcontainers.postgres import PostgresContainer
@@ -42,8 +42,8 @@ def client(test_engine):
 def clear_database(test_engine):
     yield
     with Session(test_engine) as session:
-        for table in reversed(Base.metadata.sorted_tables):
-            session.execute(table.delete())
+        table_names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
+        session.execute(text(f"TRUNCATE TABLE {table_names} RESTART IDENTITY CASCADE"))
         session.commit()
 
 
@@ -51,6 +51,11 @@ def clear_database(test_engine):
 def cargo(test_engine):
     with Session(test_engine) as session:
         popular_cargos(session=session)
+
+
+@pytest.fixture(autouse=True)
+def super_user(test_engine):
+    with Session(test_engine) as session:
         create_initial_superuser(session=session)
 
 
