@@ -53,6 +53,7 @@ def test_login(client, invite):
         "/auth/login", json={"email": USERDATA["email"], "senha": USERDATA["senha"]}
     )
     assert response.status_code == 200
+    assert "access_token" in response.json()
 
 
 def test_login_email_wrong(client, invite):
