@@ -1,12 +1,21 @@
+USERDATA = {
+    "nome": "Teste",
+    "email": "pyteste@email.com",
+    "senha": "123",
+    "cargo": 1,
+    "numero": "123",
+}
+
+
 def criar_usuario_padrao(client, invite):
     return client.post(
         "/auth/criar_conta",
         json={
-            "nome": "Teste",
-            "email": "pyteste@email.com",
-            "senha": "123",
-            "cargo": 1,
-            "numero": "123",
+            "nome": USERDATA["nome"],
+            "email": USERDATA["email"],
+            "senha": USERDATA["senha"],
+            "cargo": USERDATA["cargo"],
+            "numero": USERDATA["numero"],
             "convite": invite,
         },
     )
@@ -41,14 +50,15 @@ def test_create_user_duplicate_email(client, invite):
 def test_login(client, invite):
     criar_usuario_padrao(client, invite)
     response = client.post(
-        "/auth/login", json={"email": "pyteste@email.com", "senha": "123"}
+        "/auth/login", json={"email": USERDATA["email"], "senha": USERDATA["senha"]}
     )
     assert response.status_code == 200
 
 
 def test_login_email_wrong(client, invite):
     response = client.post(
-        "/auth/login", json={"email": "wrongemail@email.com", "senha": "123"}
+        "/auth/login",
+        json={"email": "wrongemail@email.com", "senha": USERDATA["senha"]},
     )
     assert response.status_code == 400
 
@@ -56,6 +66,6 @@ def test_login_email_wrong(client, invite):
 def test_login_password_wrong(client, invite):
     criar_usuario_padrao(client, invite)
     response = client.post(
-        "/auth/login", json={"email": "pyteste@email.com", "senha": "1234"}
+        "/auth/login", json={"email": USERDATA["email"], "senha": "1234"}
     )
     assert response.status_code == 400
