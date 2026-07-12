@@ -48,3 +48,9 @@ def test_register_student_non_existent_class(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_register_duplicate_student(client, token):
+    create_default_student(client, token)
+    response = create_default_student(client, token)
+    assert response.status_code == 400
