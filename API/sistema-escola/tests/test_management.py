@@ -33,3 +33,18 @@ def test_consult_nonexistent_stundet(client, token):
 def test_register_student(client, token):
     response = create_default_student(client, token)
     assert response.status_code == 200
+
+
+def test_register_student_non_existent_class(client, token):
+    response = client.post(
+        "/management/cadastrar_aluno",
+        json={
+            "nome": "Yugi",
+            "data_nascimento": "2001-01-11",
+            "turma": 404,
+            "nome_responsavel": "Solomon Muto",
+            "celular_responsavel": "123456",
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
