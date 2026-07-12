@@ -72,3 +72,17 @@ def test_delete_non_existent_student(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_delete_student_deleted(client, token):
+    client.delete(
+        "/management/apagar_aluno",
+        params={"id_aluno": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    response = client.delete(
+        "/management/apagar_aluno",
+        params={"id_aluno": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 400
