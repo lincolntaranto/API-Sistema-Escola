@@ -102,3 +102,12 @@ def test_update_student(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
+
+
+def test_consult_classroom(client, token):
+    response = client.get(
+        "/management/turmas",
+        params={"id_turma": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
