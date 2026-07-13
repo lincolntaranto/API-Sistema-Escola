@@ -139,3 +139,13 @@ def test_register_duplicate_classroom(client, token):
     create_default_classroom(client, token)
     response = create_default_classroom(client, token)
     assert response.status_code == 400
+
+
+def test_delete_classroom(client, token):
+    create_default_classroom(client, token)
+    response = client.delete(
+        "/management/apagar_turma",
+        params={"id_turma": 2},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
