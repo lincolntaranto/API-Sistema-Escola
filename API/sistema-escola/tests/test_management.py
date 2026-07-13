@@ -204,3 +204,12 @@ def test_consult_position(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
+
+
+def test_consult_non_existent_position(client, token):
+    response = client.get(
+        "/management/cargos",
+        params={"id_cargo": 404},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
