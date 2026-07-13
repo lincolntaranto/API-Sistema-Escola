@@ -133,3 +133,9 @@ def test_consult_non_existent_classroom(client, token):
 def test_register_classroom(client, token):
     response = create_default_classroom(client, token)
     assert response.status_code == 200
+
+
+def test_register_duplicate_classroom(client, token):
+    create_default_classroom(client, token)
+    response = create_default_classroom(client, token)
+    assert response.status_code == 400
