@@ -195,3 +195,12 @@ def test_update_non_existent_classroom(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_consult_position(client, token):
+    response = client.get(
+        "/management/cargos",
+        params={"id_cargo": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
