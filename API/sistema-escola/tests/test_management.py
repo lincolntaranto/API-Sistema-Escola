@@ -265,3 +265,23 @@ def test_update_non_existent_position(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_consult_grade(client, token):
+    create_initial_grade(client, token)
+    response = client.get(
+        "/management/notas",
+        params={
+            "id_aluno": 1,
+            "materia": "sociologia",
+            "bimestre": 1,
+            "ano": 2026,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+
+
+def test_register_grade(client, token):
+    response = create_initial_grade(client, token)
+    assert response.status_code == 200
