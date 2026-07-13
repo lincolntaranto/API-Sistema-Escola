@@ -213,3 +213,12 @@ def test_consult_non_existent_position(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_register_position(client, token):
+    response = client.post(
+        "/management/cadastrar_cargo",
+        json={"nome": "Professor"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
