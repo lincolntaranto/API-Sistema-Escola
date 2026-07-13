@@ -231,3 +231,13 @@ def test_register_duplicate_position(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 400
+
+
+def test_update_position(client, token):
+    response = client.patch(
+        "/management/atualizar_cargo",
+        params={"id_cargo": 1},
+        json={"nome": "CEO"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
