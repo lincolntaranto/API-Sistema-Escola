@@ -319,3 +319,20 @@ def test_register_duplicate_grade(client, token):
     create_initial_grade(client, token)
     response = create_initial_grade(client, token)
     assert response.status_code == 400
+
+
+def test_update_grade(client, token):
+    create_initial_grade(client, token)
+    response = client.patch(
+        "/management/atualizar_nota",
+        params={"id_nota": 1},
+        json={
+            "aluno": 1,
+            "materia": "filosofia",
+            "nota": 10,
+            "bimestre": 2,
+            "ano": 2026,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
