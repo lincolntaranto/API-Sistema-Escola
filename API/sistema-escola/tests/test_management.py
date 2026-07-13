@@ -128,3 +128,8 @@ def test_consult_non_existent_classroom(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_register_classroom(client, token):
+    response = create_default_classroom(client, token)
+    assert response.status_code == 200
