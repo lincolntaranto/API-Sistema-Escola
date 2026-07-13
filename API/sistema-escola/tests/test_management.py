@@ -12,6 +12,14 @@ def create_default_student(client, token):
     )
 
 
+def create_default_classroom(client, token):
+    return client.post(
+        "management/cadastrar_turma",
+        json={"nome": "Girafas", "serie": "1 ano", "ano": 2022, "turno": "noite"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+
 def test_consult_student(client, token):
     response = client.get(
         "/management/alunos",
