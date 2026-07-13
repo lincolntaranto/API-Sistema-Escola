@@ -111,3 +111,12 @@ def test_consult_classroom(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
+
+
+def test_consult_non_existent_classroom(client, token):
+    response = client.get(
+        "/management/turmas",
+        params={"id_turma": 2},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
