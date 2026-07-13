@@ -185,3 +185,13 @@ def test_update_classroom(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
+
+
+def test_update_non_existent_classroom(client, token):
+    response = client.patch(
+        "/management/atualizar_turma",
+        params={"id_turma": 404},
+        json={"nome": "Elefantes", "serie": "2 ano", "ano": 2023, "turno": "noite"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
