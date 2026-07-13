@@ -35,7 +35,7 @@ def test_register_student(client, token):
     assert response.status_code == 200
 
 
-def test_register_student_non_existent_class(client, token):
+def test_register_student_non_existent_classroom(client, token):
     response = client.post(
         "/management/cadastrar_aluno",
         json={
