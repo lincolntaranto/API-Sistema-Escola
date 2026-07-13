@@ -86,3 +86,19 @@ def test_delete_student_deleted(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 400
+
+
+def test_update_student(client, token):
+    response = client.patch(
+        "/management/atualizar_aluno",
+        params={"id_aluno": 1},
+        json={
+            "nome": "Cheetara",
+            "data_nascimento": "2000-04-04",
+            "turma": 1,
+            "nome_responsavel": "Taro",
+            "celular_responsavel": "1234567",
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
