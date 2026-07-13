@@ -336,3 +336,19 @@ def test_update_grade(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
+
+
+def test_update_non_existent_grade(client, token):
+    response = client.patch(
+        "/management/atualizar_nota",
+        params={"id_nota": 404},
+        json={
+            "aluno": 1,
+            "materia": "filosofia",
+            "nota": 10,
+            "bimestre": 2,
+            "ano": 2026,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
