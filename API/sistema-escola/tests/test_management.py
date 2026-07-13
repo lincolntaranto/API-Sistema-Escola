@@ -313,3 +313,9 @@ def test_consult_grade_non_existent_student(client, token):
 def test_register_grade(client, token):
     response = create_initial_grade(client, token)
     assert response.status_code == 200
+
+
+def test_register_duplicate_grade(client, token):
+    create_initial_grade(client, token)
+    response = create_initial_grade(client, token)
+    assert response.status_code == 400
