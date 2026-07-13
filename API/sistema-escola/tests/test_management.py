@@ -20,6 +20,20 @@ def create_default_classroom(client, token):
     )
 
 
+def create_initial_grade(client, token):
+    return client.post(
+        "/management/cadastrar_nota",
+        json={
+            "aluno": 1,
+            "materia": "sociologia",
+            "nota": 8.5,
+            "bimestre": 1,
+            "ano": 2026,
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+
 def test_consult_student(client, token):
     response = client.get(
         "/management/alunos",
