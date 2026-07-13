@@ -222,3 +222,12 @@ def test_register_position(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
+
+
+def test_register_duplicate_position(client, token):
+    response = client.post(
+        "/management/cadastrar_cargo",
+        json={"nome": "Diretor"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 400
