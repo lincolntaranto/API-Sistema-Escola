@@ -21,8 +21,8 @@ def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(StudentAlreadyExists)
     async def _(request, exc):
-        return JSONResponse(status_code=400, content="Aluno já cadastrado!")
+        return JSONResponse(status_code=400, content={"detail": "Aluno já cadastrado!"})
 
     @app.exception_handler(ClassroomAlreadyExists)
     async def _(request, exc):
-        return JSONResponse(status_code=400, content="Turma já cadastrada!")
+        return JSONResponse(status_code=400, content={"detail": "Turma já cadastrada!"})
