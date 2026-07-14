@@ -21,7 +21,7 @@ from services.aluno import (
     delete_student,
     update_student,
 )
-from services.turma import consult_classroom, register_classroom
+from services.turma import consult_classroom, register_classroom, delete_classroom
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -149,17 +149,7 @@ async def apagar_turma(
 ):
     """Rota para apagar uma turma do sistema."""
 
-    turma = session.query(Turma).filter(Turma.id == id_turma).first()
-    if not turma:
-        raise HTTPException(status_code=404, detail="ID de turma inexistente!")
-    session.delete(turma)
-    log = Log(
-        id_usuario=usuario.id,
-        acao="deletar_turma",
-        descricao=f"Turma {turma.nome}, de id {turma.id} foi deletada.",
-    )
-    session.add(log)
-    session.commit()
+    turma = delete_classroom(id_turma=id_turma, session=session, usuario=usuario)
     return {
         "mensagem": "Turma deletada com sucesso!",
         "id": turma.id,

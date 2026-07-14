@@ -50,3 +50,20 @@ def register_classroom(turma_schema: TurmaSchema, session: Session, usuario: Usu
     session.commit()
     session.refresh(nova_turma)
     return nova_turma
+
+
+def delete_classroom(id_turma: int, session: Session, usuario: Usuario) -> Turma:
+    turma = session.execute(
+        select(Turma).where(Turma.id == id_turma)
+    ).scalar_one_or_none()
+    if not turma:
+        raise ClassroomNotFound
+    session.delete(turma)
+    log = Log(
+        id_usuario=usuario.id,
+        acao="deletar_turma",
+        descricao=f"Turma {turma.nome}, de id {turma.id} foi deletada.",
+    )
+    session.add(log)
+    session.commit()
+    return turma
