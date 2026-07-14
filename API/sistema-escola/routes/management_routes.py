@@ -21,6 +21,7 @@ from services.aluno import (
     delete_student,
     update_student,
 )
+from services.cargo import consult_position
 from services.turma import (
     consult_classroom,
     register_classroom,
@@ -199,17 +200,7 @@ async def mostrar_cargos(
 ):
     """Rota para consultar cargos no sistema."""
 
-    cargo = session.query(Cargo).filter(Cargo.id == id_cargo).first()
-
-    if not cargo:
-        raise HTTPException(status_code=404, detail="Cargo inexistente!")
-    log = Log(
-        id_usuario=usuario.id,
-        acao="consultar_cargo",
-        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi consultado.",
-    )
-    session.add(log)
-    session.commit()
+    cargo = consult_position(id_cargo=id_cargo, session=session, usuario=usuario)
     return {"nome": cargo.nome}
 
 
