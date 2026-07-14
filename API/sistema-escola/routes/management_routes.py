@@ -21,7 +21,7 @@ from services.aluno import (
     delete_student,
     update_student,
 )
-from services.cargo import consult_position, register_position
+from services.cargo import consult_position, register_position, delete_position
 from services.turma import (
     consult_classroom,
     register_classroom,
@@ -232,17 +232,7 @@ async def apagar_cargo(
     """Rota para apagar um cargo do sistema."""
 
     verificar_autorizacao(usuario)
-    cargo = session.query(Cargo).filter(Cargo.id == id_cargo).first()
-    if not cargo:
-        raise HTTPException(status_code=404, detail="Cargo inexistente!")
-    session.delete(cargo)
-    log = Log(
-        id_usuario=usuario.id,
-        acao="deletar_cargo",
-        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi deletado.",
-    )
-    session.add(log)
-    session.commit()
+    cargo = delete_position(id_cargo=id_cargo, session=session, usuario=usuario)
     return {
         "mensagem": "Cargo deletado com sucesso!",
         "id": cargo.id,

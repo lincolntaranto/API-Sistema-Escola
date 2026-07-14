@@ -44,3 +44,21 @@ def register_position(
     session.commit()
     session.refresh(novo_cargo)
     return novo_cargo
+
+
+def delete_position(id_cargo: int, session: Session, usuario: Usuario) -> Cargo:
+    verificar_autorizacao(usuario)
+    cargo = session.execute(
+        select(Cargo).where(Cargo.id == id_cargo)
+    ).scalar_one_or_none()
+    if not cargo:
+        raise PositionNotFound
+    session.delete(cargo)
+    log = Log(
+        id_usuario=usuario.id,
+        acao="deletar_cargo",
+        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi deletado.",
+    )
+    session.add(log)
+    session.commit()
+    return cargo
