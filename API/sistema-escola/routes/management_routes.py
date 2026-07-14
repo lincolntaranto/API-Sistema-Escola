@@ -26,7 +26,7 @@ async def mostrar_alunos(
     session: Session = Depends(get_session),
     usuario: Usuario = Depends(verificar_token),
 ):
-    """ "Rota para consultar alunos registrados no sistema."""
+    """Rota para consultar alunos registrados no sistema."""
 
     aluno = consult_student_by_id(id_aluno=id_aluno, session=session, usuario=usuario)
     return {
