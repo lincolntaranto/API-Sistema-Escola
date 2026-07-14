@@ -1,8 +1,13 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from exceptions.aluno_exceptions import AlunoNaoEncontrado
-from models import Aluno, Usuario, Log
+from exceptions.aluno_exceptions import (
+    StudentNotFound,
+    ClassroomNotFound,
+    StudentAlreadyExists,
+)
+from models import Aluno, Usuario, Log, Turma
+from schemas.aluno.aluno import AlunoSchema
 
 
 def consult_student_by_id(
@@ -13,8 +18,10 @@ def consult_student_by_id(
     aluno = session.execute(
         select(Aluno).where(Aluno.id == id_aluno)
     ).scalar_one_or_none()
+
     if not aluno or aluno.deletado:
-        raise AlunoNaoEncontrado()
+        raise StudentNotFound()
+
     log = Log(
         id_usuario=usuario.id,
         id_aluno=aluno.id,
@@ -24,3 +31,43 @@ def consult_student_by_id(
     session.add(log)
     session.commit()
     return aluno
+
+
+def register_student(
+    aluno_schema: AlunoSchema, session: Session, usuario: Usuario
+) -> Aluno:
+    aluno = session.execute(
+        select(Aluno).where(
+            Aluno.nome == aluno_schema.nome,
+            Aluno.data_nascimento == aluno_schema.data_nascimento,
+            Aluno.nome_responsavel == aluno_schema.nome_responsavel,
+        )
+    ).scalar_one_or_none()
+    turma = session.execute(
+        select(Turma).where(Turma.id == aluno_schema.turma)
+    ).scalar_one_or_none()
+
+    if not turma:
+        raise ClassroomNotFound
+    if aluno:
+        raise StudentAlreadyExists
+
+    novo_aluno = Aluno(
+        nome=aluno_schema.nome,
+        data_nascimento=aluno_schema.data_nascimento,
+        turma=aluno_schema.turma,
+        nome_responsavel=aluno_schema.nome_responsavel,
+        celular_responsavel=aluno_schema.celular_responsavel,
+    )
+    session.add(novo_aluno)
+    session.flush()
+    log = Log(
+        id_usuario=usuario.id,
+        id_aluno=novo_aluno.id,
+        acao="cadastrar_aluno",
+        descricao=f"Aluno {novo_aluno.nome}, da turma {novo_aluno.turma} foi cadastrado.",
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(novo_aluno)
+    return novo_aluno

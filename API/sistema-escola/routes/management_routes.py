@@ -15,7 +15,7 @@ from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
 from core.security import verificar_token, verificar_autorizacao, criar_convite
-from services.aluno import consult_student_by_id
+from services.aluno import consult_student_by_id, register_student
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -46,38 +46,9 @@ async def cadastrar_aluno(
 ):
     """Rota para cadastrar um aluno no sistema"""
 
-    aluno = (
-        session.query(Aluno)
-        .filter(
-            Aluno.nome == aluno_schema.nome,
-            Aluno.data_nascimento == aluno_schema.data_nascimento,
-            Aluno.nome_responsavel == aluno_schema.nome_responsavel,
-        )
-        .first()
+    novo_aluno = register_student(
+        aluno_schema=aluno_schema, session=session, usuario=usuario
     )
-    turma = session.query(Turma).filter(Turma.id == aluno_schema.turma).first()
-    if not turma:
-        raise HTTPException(status_code=404, detail="Turma inexistente!")
-    if aluno:
-        raise HTTPException(status_code=400, detail="Aluno já cadastrado")
-    novo_aluno = Aluno(
-        nome=aluno_schema.nome,
-        data_nascimento=aluno_schema.data_nascimento,
-        turma=aluno_schema.turma,
-        nome_responsavel=aluno_schema.nome_responsavel,
-        celular_responsavel=aluno_schema.celular_responsavel,
-    )
-    session.add(novo_aluno)
-    session.flush()
-    log = Log(
-        id_usuario=usuario.id,
-        id_aluno=novo_aluno.id,
-        acao="cadastrar_aluno",
-        descricao=f"Aluno {novo_aluno.nome}, da turma {novo_aluno.turma} foi cadastrado.",
-    )
-    session.add(log)
-    session.commit()
-    session.refresh(novo_aluno)
     return {
         "mensagem": "Aluno cadastrado com sucesso!",
         "id": novo_aluno.id,
