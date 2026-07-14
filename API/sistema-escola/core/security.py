@@ -79,7 +79,7 @@ def autenticar_usuario(email, senha, session):
 
 def verificar_autorizacao(usuario):
     if not usuario.admin:
-        raise HTTPException(status_code=401, detail="Permissão insuficiente!")
+        raise HTTPException(status_code=403, detail="Permissão insuficiente!")
 
 
 def criar_convite(
