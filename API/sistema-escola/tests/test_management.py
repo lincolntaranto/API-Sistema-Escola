@@ -362,3 +362,12 @@ def test_create_invite(client, token):
     )
     assert response.status_code == 200
     assert "convite_token" in response.json()
+
+
+def test_create_non_existent_position_invite(client, token):
+    response = client.post(
+        "/management/cadastrar_convite",
+        json={"id_cargo": 404},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 404
