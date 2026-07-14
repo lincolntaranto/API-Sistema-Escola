@@ -15,6 +15,7 @@ from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
 from core.security import verificar_token, verificar_autorizacao, criar_convite
+from services.aluno import consult_student_by_id
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -27,17 +28,7 @@ async def mostrar_alunos(
 ):
     """ "Rota para consultar alunos registrados no sistema."""
 
-    aluno = session.query(Aluno).filter(Aluno.id == id_aluno).first()
-    if not aluno or aluno.deletado:
-        raise HTTPException(status_code=404, detail="ID de aluno inexistente!")
-    log = Log(
-        id_usuario=usuario.id,
-        id_aluno=aluno.id,
-        acao="consultar_aluno",
-        descricao=f"Aluno {aluno.nome}, da turma {aluno.turma} foi consultado.",
-    )
-    session.add(log)
-    session.commit()
+    aluno = consult_student_by_id(id_aluno=id_aluno, session=session, usuario=usuario)
     return {
         "nome": aluno.nome,
         "turma": aluno.turma,
