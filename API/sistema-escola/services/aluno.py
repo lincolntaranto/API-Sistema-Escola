@@ -71,3 +71,22 @@ def register_student(
     session.commit()
     session.refresh(novo_aluno)
     return novo_aluno
+
+
+def delete_student(id_aluno: int, session: Session, usuario: Usuario) -> Aluno:
+    aluno = session.execute(
+        select(Aluno).where(Aluno.id == id_aluno)
+    ).scalar_one_or_none()
+    if not aluno or aluno.deletado:
+        raise StudentNotFound
+    aluno.deletado = True
+    session.add(aluno)
+    log = Log(
+        id_usuario=usuario.id,
+        id_aluno=aluno.id,
+        acao="deletar_aluno",
+        descricao=f"Aluno {aluno.nome}, da turma {aluno.turma} foi deletado.",
+    )
+    session.add(log)
+    session.commit()
+    return aluno

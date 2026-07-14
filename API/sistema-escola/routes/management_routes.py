@@ -15,7 +15,7 @@ from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
 from core.security import verificar_token, verificar_autorizacao, criar_convite
-from services.aluno import consult_student_by_id, register_student
+from services.aluno import consult_student_by_id, register_student, delete_student
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -65,21 +65,7 @@ async def apagar_aluno(
 ):
     """Rota para deletar um aluno do sistema"""
 
-    aluno = session.query(Aluno).filter(Aluno.id == id_aluno).first()
-    if not aluno:
-        raise HTTPException(status_code=404, detail="ID de aluno inexistente!")
-    if aluno.deletado:
-        raise HTTPException(status_code=400, detail="Aluno já foi deletado!")
-    aluno.deletado = True
-    session.add(aluno)
-    log = Log(
-        id_usuario=usuario.id,
-        id_aluno=aluno.id,
-        acao="deletar_aluno",
-        descricao=f"Aluno {aluno.nome}, da turma {aluno.turma} foi deletado.",
-    )
-    session.add(log)
-    session.commit()
+    aluno = delete_student(id_aluno=id_aluno, session=session, usuario=usuario)
     return {
         "mensagem": "Aluno deletado com sucesso!",
         "id": aluno.id,

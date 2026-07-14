@@ -107,7 +107,7 @@ def test_delete_student_deleted(client, token):
         params={"id_aluno": 1},
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.status_code == 400
+    assert response.status_code == 404
 
 
 def test_update_student(client, token):
