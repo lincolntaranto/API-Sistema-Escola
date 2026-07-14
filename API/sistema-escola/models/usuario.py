@@ -9,6 +9,6 @@ class Usuario(Base):
     nome = Column(String(100), nullable=False)
     senha = Column(String(100), nullable=False)
     cargo = Column(ForeignKey("cargos.id"), nullable=False)
-    email = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
     numero = Column(String(100), nullable=False)
     admin = Column(Boolean, default=False, nullable=False)
