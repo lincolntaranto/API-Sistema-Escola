@@ -15,7 +15,12 @@ from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
 from core.security import verificar_token, verificar_autorizacao, criar_convite
-from services.aluno import consult_student_by_id, register_student, delete_student
+from services.aluno import (
+    consult_student_by_id,
+    register_student,
+    delete_student,
+    update_student,
+)
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -83,22 +88,12 @@ async def atualizar_aluno(
 ):
     """Rota para atualizar um aluno do sistema."""
 
-    aluno = session.get(Aluno, id_aluno)
-    if not aluno or aluno.deletado:
-        raise HTTPException(status_code=404, detail="Aluno inexistente!")
-
-    update_model(session=aluno, schema=aluno_update_schema)
-
-    log = Log(
-        id_usuario=usuario.id,
-        id_aluno=aluno.id,
-        acao="atualizar_aluno",
-        descricao=f"Aluno {aluno.nome}, da turma {aluno.turma} foi atualizado.",
+    aluno = update_student(
+        id_aluno=id_aluno,
+        aluno_update_schema=aluno_update_schema,
+        session=session,
+        usuario=usuario,
     )
-
-    session.add(log)
-    session.commit()
-    session.refresh(aluno)
 
     return {
         "mensagem": "Aluno atualizado com sucesso!",
@@ -221,7 +216,7 @@ async def atualizar_turma(
     if not turma:
         raise HTTPException(status_code=404, detail="Turma inexistente!")
 
-    update_model(session=turma, schema=turma_update_schema)
+    update_model(obj=turma, schema=turma_update_schema)
 
     log = Log(
         id_usuario=usuario.id,
@@ -336,7 +331,7 @@ async def atualizar_cargo(
     cargo = session.get(Cargo, id_cargo)
     if not cargo:
         raise HTTPException(status_code=404, detail="Cargo inexistente!")
-    update_model(session=cargo, schema=cargo_schema)
+    update_model(obj=cargo, schema=cargo_schema)
 
     log = Log(
         id_usuario=usuario.id,
@@ -462,7 +457,7 @@ async def atualizar_nota(
     if not nota:
         raise HTTPException(status_code=404, detail="Nota inexistente!")
 
-    update_model(session=nota, schema=nota_update_schema)
+    update_model(obj=nota, schema=nota_update_schema)
 
     log = Log(
         id_usuario=usuario.id,

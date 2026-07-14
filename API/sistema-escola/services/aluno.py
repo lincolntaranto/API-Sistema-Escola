@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from core.crud import update_model
 from exceptions.aluno_exceptions import (
     StudentNotFound,
     ClassroomNotFound,
@@ -8,6 +9,7 @@ from exceptions.aluno_exceptions import (
 )
 from models import Aluno, Usuario, Log, Turma
 from schemas.aluno.aluno import AlunoSchema
+from schemas.aluno.aluno_update import AlunoUpdateSchema
 
 
 def consult_student_by_id(
@@ -89,4 +91,27 @@ def delete_student(id_aluno: int, session: Session, usuario: Usuario) -> Aluno:
     )
     session.add(log)
     session.commit()
+    return aluno
+
+
+def update_student(
+    id_aluno: int,
+    aluno_update_schema: AlunoUpdateSchema,
+    session: Session,
+    usuario: Usuario,
+) -> Aluno:
+    aluno = session.get(Aluno, id_aluno)
+    if not aluno or aluno.deletado:
+        raise StudentNotFound
+    update_model(obj=aluno, schema=aluno_update_schema)
+    log = Log(
+        id_usuario=usuario.id,
+        id_aluno=aluno.id,
+        acao="atualizar_aluno",
+        descricao=f"Aluno {aluno.nome}, da turma {aluno.turma} foi atualizado.",
+    )
+
+    session.add(log)
+    session.commit()
+    session.refresh(aluno)
     return aluno
