@@ -1,9 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from core.crud import update_model
 from exceptions.turma_exceptions import ClassroomNotFound, ClassroomAlreadyExists
 from models import Turma, Usuario, Log
 from schemas.turma.turma import TurmaSchema
+from schemas.turma.turma_update import TurmaUpdateSchema
 
 
 def consult_classroom(id_turma: int, session: Session, usuario: Usuario) -> Turma:
@@ -66,4 +68,31 @@ def delete_classroom(id_turma: int, session: Session, usuario: Usuario) -> Turma
     )
     session.add(log)
     session.commit()
+    return turma
+
+
+def update_classroom(
+    id_turma: int,
+    turma_update_schema: TurmaUpdateSchema,
+    session: Session,
+    usuario: Usuario,
+) -> Turma:
+    turma = session.execute(
+        select(Turma).where(Turma.id == id_turma)
+    ).scalar_one_or_none()
+
+    if not turma:
+        raise ClassroomNotFound
+
+    update_model(obj=turma, schema=turma_update_schema)
+    log = Log(
+        id_usuario=usuario.id,
+        acao="atualizar_turma",
+        descricao=f"Turma {turma.nome}, de ID {turma.id}, foi atualizada.",
+    )
+
+    session.add(log)
+    session.commit()
+    session.refresh(turma)
+
     return turma

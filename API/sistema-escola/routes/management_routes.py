@@ -5,7 +5,7 @@ from core.crud import update_model
 from models.convites import Convite
 from models.log import Log
 from models.session import get_session
-from models import Aluno, Usuario, Turma, Cargo, Nota
+from models import Aluno, Usuario, Cargo, Nota
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
@@ -21,7 +21,12 @@ from services.aluno import (
     delete_student,
     update_student,
 )
-from services.turma import consult_classroom, register_classroom, delete_classroom
+from services.turma import (
+    consult_classroom,
+    register_classroom,
+    delete_classroom,
+    update_classroom,
+)
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -169,21 +174,12 @@ async def atualizar_turma(
 ):
     """Rota para atualizar uma turma do sistema."""
 
-    turma = session.get(Turma, id_turma)
-    if not turma:
-        raise HTTPException(status_code=404, detail="Turma inexistente!")
-
-    update_model(obj=turma, schema=turma_update_schema)
-
-    log = Log(
-        id_usuario=usuario.id,
-        acao="atualizar_turma",
-        descricao=f"Turma {turma.nome}, de ID {turma.id}, foi atualizada.",
+    turma = update_classroom(
+        id_turma=id_turma,
+        turma_update_schema=turma_update_schema,
+        session=session,
+        usuario=usuario,
     )
-
-    session.add(log)
-    session.commit()
-    session.refresh(turma)
 
     return {
         "mensagem": "Turma atualizada com sucesso!",
