@@ -21,7 +21,7 @@ from services.aluno import (
     delete_student,
     update_student,
 )
-from services.cargo import consult_position
+from services.cargo import consult_position, register_position
 from services.turma import (
     consult_classroom,
     register_classroom,
@@ -213,21 +213,9 @@ async def cadastrar_cargo(
     """Rota para cadastrar um cargo no sistema."""
 
     verificar_autorizacao(usuario)
-    cargo = session.query(Cargo).filter(Cargo.nome == cargo_schema.nome).first()
-
-    if cargo:
-        raise HTTPException(status_code=400, detail="Cargo já cadastrado!")
-    novo_cargo = Cargo(nome=cargo_schema.nome)
-    session.add(novo_cargo)
-    session.flush()
-    log = Log(
-        id_usuario=usuario.id,
-        acao="cadastrar_cargo",
-        descricao=f"Cargo {novo_cargo.nome}, de ID {novo_cargo.id}, foi cadastrado!",
+    novo_cargo = register_position(
+        cargo_schema=cargo_schema, session=session, usuario=usuario
     )
-    session.add(log)
-    session.commit()
-    session.refresh(novo_cargo)
     return {
         "mensagem": "Cargo cadastrado com sucesso!",
         "id": novo_cargo.id,
