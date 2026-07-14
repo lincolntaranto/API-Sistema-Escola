@@ -21,6 +21,7 @@ from services.aluno import (
     delete_student,
     update_student,
 )
+from services.turma import consult_classroom, register_classroom
 
 management_router = APIRouter(prefix="/management", tags=["management"])
 
@@ -110,17 +111,7 @@ async def mostrar_turmas(
 ):
     """Rota para consultar turmas no sistema"""
 
-    turma = session.query(Turma).filter(Turma.id == id_turma).first()
-    if not turma:
-        raise HTTPException(status_code=404, detail="Turma inexistente!")
-    log = Log(
-        id_usuario=usuario.id,
-        # id_turma=turma.id, // adição futura
-        acao="consultar_turma",
-        descricao=f"Turma {turma.nome}, de ID {turma.id}, foi consultada.",
-    )
-    session.add(log)
-    session.commit()
+    turma = consult_classroom(id_turma=id_turma, session=session, usuario=usuario)
     return {
         "turma": turma.nome,
         "serie": turma.serie,
@@ -137,33 +128,9 @@ async def cadastrar_turma(
 ):
     """Rota para cadastrar uma turma no sistema"""
 
-    turma = (
-        session.query(Turma)
-        .filter(
-            Turma.nome == turma_schema.nome,
-            Turma.serie == turma_schema.serie,
-            Turma.turno == turma_schema.turno,
-        )
-        .first()
+    nova_turma = register_classroom(
+        turma_schema=turma_schema, session=session, usuario=usuario
     )
-    if turma:
-        raise HTTPException(status_code=400, detail="Turma já cadastrada!")
-    nova_turma = Turma(
-        nome=turma_schema.nome,
-        serie=turma_schema.serie,
-        ano=turma_schema.ano,
-        turno=turma_schema.turno,
-    )
-    session.add(nova_turma)
-    session.flush()
-    log = Log(
-        id_usuario=usuario.id,
-        acao="cadastrar_turma",
-        descricao=f"Turma {nova_turma.nome}, de ID {nova_turma.id}, foi cadastrada!",
-    )
-    session.add(log)
-    session.commit()
-    session.refresh(nova_turma)
     return {
         "mensagem": "Turma cadastrada com sucesso!",
         "id": nova_turma.id,

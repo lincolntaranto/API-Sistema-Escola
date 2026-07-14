@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from core.crud import update_model
 from exceptions.aluno_exceptions import (
     StudentNotFound,
-    ClassroomNotFound,
     StudentAlreadyExists,
 )
+from exceptions.turma_exceptions import ClassroomNotFound
 from models import Aluno, Usuario, Log, Turma
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema

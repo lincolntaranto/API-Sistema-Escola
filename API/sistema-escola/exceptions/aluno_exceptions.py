@@ -4,12 +4,6 @@ class StudentNotFound(Exception):
     pass
 
 
-class ClassroomNotFound(Exception):
-    """Levantada quando uma turma não é encontrada."""
-
-    pass
-
-
 class StudentAlreadyExists(Exception):
     """Levantada quando se tenta cadastrar um aluno já cadastrado."""
 

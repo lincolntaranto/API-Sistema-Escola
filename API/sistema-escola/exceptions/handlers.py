@@ -3,9 +3,9 @@ from starlette.responses import JSONResponse
 
 from exceptions.aluno_exceptions import (
     StudentNotFound,
-    ClassroomNotFound,
     StudentAlreadyExists,
 )
+from exceptions.turma_exceptions import ClassroomNotFound, ClassroomAlreadyExists
 
 
 def register_exception_handlers(app: FastAPI):
@@ -22,3 +22,7 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(StudentAlreadyExists)
     async def _(request, exc):
         return JSONResponse(status_code=400, content="Aluno já cadastrado!")
+
+    @app.exception_handler(ClassroomAlreadyExists)
+    async def _(request, exc):
+        return JSONResponse(status_code=400, content="Turma já cadastrada!")
