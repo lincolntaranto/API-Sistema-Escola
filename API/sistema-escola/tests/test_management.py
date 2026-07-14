@@ -352,3 +352,13 @@ def test_update_non_existent_grade(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_create_invite(client, token):
+    response = client.post(
+        "/management/cadastrar_convite",
+        json={"id_cargo": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    assert "convite_token" in response.json()
