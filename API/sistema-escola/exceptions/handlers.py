@@ -6,6 +6,7 @@ from exceptions.aluno_exceptions import (
     StudentAlreadyExists,
 )
 from exceptions.cargo_exceptions import PositionNotFound, PositionAlreadyExists
+from exceptions.nota_exceptions import GradeNotFound, GradeAlreadyExists
 from exceptions.turma_exceptions import ClassroomNotFound, ClassroomAlreadyExists
 
 
@@ -35,3 +36,11 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(PositionAlreadyExists)
     async def _(request, exc):
         return JSONResponse(status_code=400, content={"detail": "Cargo já cadastrado!"})
+
+    @app.exception_handler(GradeNotFound)
+    async def _(request, exc):
+        return JSONResponse(status_code=404, content={"detail": "Nota inexistente!"})
+
+    @app.exception_handler(GradeAlreadyExists)
+    async def _(request, exc):
+        return JSONResponse(status_code=400, content={"detail": "Nota já cadastrada!"})
