@@ -24,7 +24,7 @@ def create_initial_grade(client, token):
     return client.post(
         "/management/cadastrar_nota",
         json={
-            "aluno": 1,
+            "id_aluno": 1,
             "materia": "sociologia",
             "nota": 8.5,
             "bimestre": 1,
