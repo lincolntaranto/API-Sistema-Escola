@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, Float
+from sqlalchemy import ForeignKey, String, Float
+from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 
@@ -6,9 +7,11 @@ from .base import Base
 class Nota(Base):
     __tablename__ = "notas"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    aluno = Column(ForeignKey("alunos.id"), nullable=False)
-    materia = Column(String(100), nullable=False)
-    nota = Column(Float)
-    bimestre = Column(Integer, nullable=False)
-    ano = Column(Integer, nullable=False)
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True, nullable=False
+    )
+    id_aluno: Mapped[int] = mapped_column(ForeignKey("alunos.id"), nullable=False)
+    materia: Mapped[str] = mapped_column(String(100), nullable=False)
+    nota: Mapped[Float] = mapped_column(Float)
+    bimestre: Mapped[int] = mapped_column(nullable=False)
+    ano: Mapped[int] = mapped_column(nullable=False)
