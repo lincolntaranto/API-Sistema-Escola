@@ -1,9 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from core.crud import update_model
 from exceptions.nota_exceptions import GradeNotFound, GradeAlreadyExists
 from models import Usuario, Nota, Log
 from schemas.nota.nota import NotaSchema
+from schemas.nota.nota_update import NotaUpdateSchema
 from services.aluno import consult_student_by_id
 
 
@@ -68,3 +70,27 @@ def register_grade(nota_schema: NotaSchema, session: Session, usuario: Usuario) 
     session.commit()
     session.refresh(nova_nota)
     return nova_nota
+
+
+def update_grade(
+    id_nota: int,
+    nota_update_schema: NotaUpdateSchema,
+    session: Session,
+    usuario: Usuario,
+) -> Nota:
+    nota = session.execute(select(Nota).where(Nota.id == id_nota)).scalar_one_or_none()
+    if not nota:
+        raise GradeNotFound
+    update_model(obj=nota, schema=nota_update_schema)
+
+    log = Log(
+        id_usuario=usuario.id,
+        id_aluno=nota.id_aluno,
+        acao="atualizar_nota",
+        descricao=f"Nota de ID {nota.id}, da materia {nota.materia} e do bimestre {nota.bimestre}, foi atualizada.",
+    )
+
+    session.add(log)
+    session.commit()
+    session.refresh(nota)
+    return nota

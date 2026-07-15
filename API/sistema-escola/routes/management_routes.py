@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from core.crud import update_model
 from models.convites import Convite
 from models.log import Log
 from models.session import get_session
-from models import Usuario, Cargo, Nota
+from models import Usuario, Cargo
 from schemas.aluno.aluno import AlunoSchema
 from schemas.aluno.aluno_update import AlunoUpdateSchema
 from schemas.cargo import CargoSchema
@@ -27,7 +26,7 @@ from services.cargo import (
     delete_position,
     update_position,
 )
-from services.nota import consult_grade, register_grade
+from services.nota import consult_grade, register_grade, update_grade
 from services.turma import (
     consult_classroom,
     register_classroom,
@@ -320,22 +319,12 @@ async def atualizar_nota(
     usuario: Usuario = Depends(verificar_token),
 ):
     """Rota para atualizar uma nota do sistema."""
-    nota = session.get(Nota, id_nota)
-    if not nota:
-        raise HTTPException(status_code=404, detail="Nota inexistente!")
-
-    update_model(obj=nota, schema=nota_update_schema)
-
-    log = Log(
-        id_usuario=usuario.id,
-        id_aluno=nota.id_aluno,
-        acao="atualizar_nota",
-        descricao=f"Nota de ID {nota.id}, da materia {nota.materia} e do bimestre {nota.bimestre}, foi atualizada.",
+    nota = update_grade(
+        id_nota=id_nota,
+        nota_update_schema=nota_update_schema,
+        session=session,
+        usuario=usuario,
     )
-
-    session.add(log)
-    session.commit()
-    session.refresh(nota)
 
     return {
         "mensagem": "Nota atualizada com sucesso!",
