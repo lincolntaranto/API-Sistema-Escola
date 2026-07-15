@@ -17,7 +17,7 @@ def consult_grade(
     aluno = consult_student_by_id(id_aluno=id_aluno, session=session, usuario=usuario)
     nota = session.execute(
         select(Nota).where(
-            Nota.aluno == id_aluno,
+            Nota.id_aluno == id_aluno,
             Nota.materia == materia,
             Nota.bimestre == bimestre,
             Nota.ano == ano,
