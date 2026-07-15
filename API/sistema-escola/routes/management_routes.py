@@ -27,7 +27,7 @@ from services.cargo import (
     delete_position,
     update_position,
 )
-from services.nota import consult_grade
+from services.nota import consult_grade, register_grade
 from services.turma import (
     consult_classroom,
     register_classroom,
@@ -298,42 +298,9 @@ async def cadastrar_nota(
 ):
     """Rota para cadastrar nota de um aluno no sistema."""
 
-    nota = (
-        session.query(Nota)
-        .filter(
-            Nota.id_aluno == nota_schema.id_aluno,
-            Nota.materia == nota_schema.materia,
-            Nota.bimestre == nota_schema.bimestre,
-            Nota.ano == nota_schema.ano,
-        )
-        .first()
+    nova_nota = register_grade(
+        nota_schema=nota_schema, session=session, usuario=usuario
     )
-    if nota:
-        raise HTTPException(
-            status_code=400,
-            detail=f"A nota de {nota_schema.materia} do bimestre {nota_schema.bimestre}"
-            f"já foi cadastrada, se ela foi inserida errada, por favor use a rota"
-            f"de atualização para muda-la.",
-        )
-    nova_nota = Nota(
-        id_aluno=nota_schema.id_aluno,
-        materia=nota_schema.materia,
-        nota=nota_schema.nota,
-        bimestre=nota_schema.bimestre,
-        ano=nota_schema.ano,
-    )
-    session.add(nova_nota)
-    session.flush()
-    log = Log(
-        id_usuario=usuario.id,
-        id_aluno=nova_nota.id_aluno,
-        acao="cadastrar_nota",
-        descricao=f"Nota de ID {nova_nota.id} da materia {nova_nota.materia}, do bimestre {nova_nota.bimestre} e do ano"
-        f" {nova_nota.ano}, foi cadastrada.",
-    )
-    session.add(log)
-    session.commit()
-    session.refresh(nova_nota)
     return {
         "mensagem": "Nota cadastrada com sucesso!",
         "id": nova_nota.id,
