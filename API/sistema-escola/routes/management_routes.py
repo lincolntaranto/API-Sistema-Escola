@@ -21,7 +21,12 @@ from services.aluno import (
     delete_student,
     update_student,
 )
-from services.cargo import consult_position, register_position, delete_position
+from services.cargo import (
+    consult_position,
+    register_position,
+    delete_position,
+    update_position,
+)
 from services.turma import (
     consult_classroom,
     register_classroom,
@@ -250,19 +255,9 @@ async def atualizar_cargo(
     """Rota para atualizar um cargo no sistema."""
 
     verificar_autorizacao(usuario)
-    cargo = session.get(Cargo, id_cargo)
-    if not cargo:
-        raise HTTPException(status_code=404, detail="Cargo inexistente!")
-    update_model(obj=cargo, schema=cargo_schema)
-
-    log = Log(
-        id_usuario=usuario.id,
-        acao="atualizar_cargo",
-        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi atualizado.",
+    cargo = update_position(
+        id_cargo=id_cargo, cargo_schema=cargo_schema, session=session, usuario=usuario
     )
-    session.add(log)
-    session.commit()
-    session.refresh(cargo)
 
     return {"mensagem": "Cargo atualizado com sucesso!", "id": cargo.id}
 

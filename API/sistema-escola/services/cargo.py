@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from core.crud import update_model
 from core.security import verificar_autorizacao
 from exceptions.cargo_exceptions import PositionNotFound, PositionAlreadyExists
 from models import Usuario, Cargo, Log
@@ -61,4 +62,25 @@ def delete_position(id_cargo: int, session: Session, usuario: Usuario) -> Cargo:
     )
     session.add(log)
     session.commit()
+    return cargo
+
+
+def update_position(
+    id_cargo: int, cargo_schema: CargoSchema, session: Session, usuario: Usuario
+) -> Cargo:
+    verificar_autorizacao(usuario)
+    cargo = session.execute(
+        select(Cargo).where(Cargo.id == id_cargo)
+    ).scalar_one_or_none()
+    if not cargo:
+        raise PositionNotFound
+    update_model(obj=cargo, schema=cargo_schema)
+    log = Log(
+        id_usuario=usuario.id,
+        acao="atualizar_cargo",
+        descricao=f"Cargo {cargo.nome}, de ID {cargo.id}, foi atualizado.",
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(cargo)
     return cargo
