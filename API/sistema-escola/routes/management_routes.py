@@ -282,7 +282,7 @@ async def mostrar_notas(
         usuario=usuario,
     )
     return {
-        "nome": nota.aluno,
+        "nome": nota.id_aluno,
         "ano": nota.ano,
         "materia": nota.materia,
         "bimestre": nota.bimestre,
@@ -301,7 +301,7 @@ async def cadastrar_nota(
     nota = (
         session.query(Nota)
         .filter(
-            Nota.aluno == nota_schema.aluno,
+            Nota.id_aluno == nota_schema.id_aluno,
             Nota.materia == nota_schema.materia,
             Nota.bimestre == nota_schema.bimestre,
             Nota.ano == nota_schema.ano,
@@ -316,7 +316,7 @@ async def cadastrar_nota(
             f"de atualização para muda-la.",
         )
     nova_nota = Nota(
-        aluno=nota_schema.aluno,
+        id_aluno=nota_schema.id_aluno,
         materia=nota_schema.materia,
         nota=nota_schema.nota,
         bimestre=nota_schema.bimestre,
@@ -326,7 +326,7 @@ async def cadastrar_nota(
     session.flush()
     log = Log(
         id_usuario=usuario.id,
-        id_aluno=nova_nota.aluno,
+        id_aluno=nova_nota.id_aluno,
         acao="cadastrar_nota",
         descricao=f"Nota de ID {nova_nota.id} da materia {nova_nota.materia}, do bimestre {nova_nota.bimestre} e do ano"
         f" {nova_nota.ano}, foi cadastrada.",
@@ -337,7 +337,7 @@ async def cadastrar_nota(
     return {
         "mensagem": "Nota cadastrada com sucesso!",
         "id": nova_nota.id,
-        "id_aluno": nova_nota.aluno,
+        "id_aluno": nova_nota.id_aluno,
         "ano": nova_nota.ano,
         "materia": nova_nota.materia,
         "bimestre": nova_nota.bimestre,
@@ -361,7 +361,7 @@ async def atualizar_nota(
 
     log = Log(
         id_usuario=usuario.id,
-        id_aluno=nota.aluno,
+        id_aluno=nota.id_aluno,
         acao="atualizar_nota",
         descricao=f"Nota de ID {nota.id}, da materia {nota.materia} e do bimestre {nota.bimestre}, foi atualizada.",
     )
@@ -373,7 +373,7 @@ async def atualizar_nota(
     return {
         "mensagem": "Nota atualizada com sucesso!",
         "id": nota.id,
-        "aluno_id": nota.aluno,
+        "aluno_id": nota.id_aluno,
         "ano": nota.ano,
         "materia": nota.materia,
         "bimestre": nota.bimestre,

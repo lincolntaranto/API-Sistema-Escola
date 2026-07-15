@@ -4,7 +4,7 @@ from typing import Optional
 
 
 class NotaUpdateSchema(BaseModel):
-    aluno: Optional[int] = None
+    id_aluno: Optional[int] = None
     materia: Optional[str] = None
     nota: Optional[float] = None
     bimestre: Optional[int] = None

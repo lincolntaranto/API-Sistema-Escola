@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class NotaSchema(BaseModel):
-    aluno: int
+    id_aluno: int
     materia: str
     nota: float
     bimestre: int
