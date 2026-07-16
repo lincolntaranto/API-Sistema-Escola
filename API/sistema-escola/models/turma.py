@@ -1,6 +1,7 @@
 import enum
 
-from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy import String, Enum
+from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 
@@ -14,8 +15,8 @@ class Turnos(enum.Enum):
 class Turma(Base):
     __tablename__ = "turmas"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    nome = Column(String(100), nullable=False)
-    serie = Column(String(20), nullable=False)
-    ano = Column(Integer, nullable=False)
-    turno = Column(Enum(Turnos), nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    nome: Mapped[str] = mapped_column(String(100))
+    serie: Mapped[str] = mapped_column(String(20))
+    ano: Mapped[int] = mapped_column(nullable=False)
+    turno: Mapped[Turnos] = mapped_column(Enum(Turnos))
