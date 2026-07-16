@@ -1,6 +1,6 @@
 def create_default_student(client, token):
     return client.post(
-        "/management/cadastrar_aluno",
+        "/alunos",
         json={
             "nome": "Yugi",
             "data_nascimento": "2001-01-11",
@@ -14,7 +14,7 @@ def create_default_student(client, token):
 
 def create_default_classroom(client, token):
     return client.post(
-        "management/cadastrar_turma",
+        "/turmas",
         json={"nome": "Girafas", "serie": "1 ano", "ano": 2022, "turno": "noite"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -22,7 +22,7 @@ def create_default_classroom(client, token):
 
 def create_initial_grade(client, token):
     return client.post(
-        "/management/cadastrar_nota",
+        "/notas",
         json={
             "id_aluno": 1,
             "materia": "sociologia",
@@ -36,8 +36,7 @@ def create_initial_grade(client, token):
 
 def test_consult_student(client, token):
     response = client.get(
-        "/management/alunos",
-        params={"id_aluno": 1},
+        "/alunos/1",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert "nome" in response.json()
@@ -45,8 +44,7 @@ def test_consult_student(client, token):
 
 def test_consult_nonexistent_stundet(client, token):
     response = client.get(
-        "/management/alunos",
-        params={"id_aluno": 200},
+        "/alunos/200",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
@@ -59,7 +57,7 @@ def test_register_student(client, token):
 
 def test_register_student_non_existent_classroom(client, token):
     response = client.post(
-        "/management/cadastrar_aluno",
+        "/alunos",
         json={
             "nome": "Yugi",
             "data_nascimento": "2001-01-11",
@@ -80,8 +78,7 @@ def test_register_duplicate_student(client, token):
 
 def test_delete_student(client, token):
     response = client.delete(
-        "/management/apagar_aluno",
-        params={"id_aluno": 1},
+        "/alunos/1",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -89,8 +86,7 @@ def test_delete_student(client, token):
 
 def test_delete_non_existent_student(client, token):
     response = client.delete(
-        "/management/apagar_aluno",
-        params={"id_aluno": 200},
+        "/alunos/200",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
@@ -98,13 +94,11 @@ def test_delete_non_existent_student(client, token):
 
 def test_delete_student_deleted(client, token):
     client.delete(
-        "/management/apagar_aluno",
-        params={"id_aluno": 1},
+        "/alunos/1",
         headers={"Authorization": f"Bearer {token}"},
     )
     response = client.delete(
-        "/management/apagar_aluno",
-        params={"id_aluno": 1},
+        "/alunos/1",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
@@ -112,8 +106,7 @@ def test_delete_student_deleted(client, token):
 
 def test_update_student(client, token):
     response = client.patch(
-        "/management/atualizar_aluno",
-        params={"id_aluno": 1},
+        "/alunos/1",
         json={
             "nome": "Cheetara",
             "data_nascimento": "2000-04-04",
@@ -128,8 +121,7 @@ def test_update_student(client, token):
 
 def test_update_non_existent_student(client, token):
     response = client.patch(
-        "/management/atualizar_aluno",
-        params={"id_aluno": 404},
+        "/alunos/404",
         json={
             "nome": "Cheetara",
             "data_nascimento": "2000-04-04",
@@ -144,8 +136,7 @@ def test_update_non_existent_student(client, token):
 
 def test_consult_classroom(client, token):
     response = client.get(
-        "/management/turmas",
-        params={"id_turma": 1},
+        "/turmas/1",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -153,8 +144,7 @@ def test_consult_classroom(client, token):
 
 def test_consult_non_existent_classroom(client, token):
     response = client.get(
-        "/management/turmas",
-        params={"id_turma": 2},
+        "/turmas/2",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
@@ -174,8 +164,7 @@ def test_register_duplicate_classroom(client, token):
 def test_delete_classroom(client, token):
     create_default_classroom(client, token)
     response = client.delete(
-        "/management/apagar_turma",
-        params={"id_turma": 2},
+        "/turmas/2",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -184,8 +173,7 @@ def test_delete_classroom(client, token):
 def test_delete_non_existent_classroom(client, token):
     create_default_classroom(client, token)
     response = client.delete(
-        "/management/apagar_turma",
-        params={"id_turma": 404},
+        "/turmas/404",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
@@ -193,8 +181,7 @@ def test_delete_non_existent_classroom(client, token):
 
 def test_update_classroom(client, token):
     response = client.patch(
-        "/management/atualizar_turma",
-        params={"id_turma": 1},
+        "/turmas/1",
         json={"nome": "Elefantes", "serie": "2 ano", "ano": 2023, "turno": "noite"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -203,8 +190,7 @@ def test_update_classroom(client, token):
 
 def test_update_non_existent_classroom(client, token):
     response = client.patch(
-        "/management/atualizar_turma",
-        params={"id_turma": 404},
+        "/turmas/404",
         json={"nome": "Elefantes", "serie": "2 ano", "ano": 2023, "turno": "noite"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -213,8 +199,7 @@ def test_update_non_existent_classroom(client, token):
 
 def test_consult_position(client, token):
     response = client.get(
-        "/management/cargos",
-        params={"id_cargo": 1},
+        "/cargos/1",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
@@ -222,8 +207,7 @@ def test_consult_position(client, token):
 
 def test_consult_non_existent_position(client, token):
     response = client.get(
-        "/management/cargos",
-        params={"id_cargo": 404},
+        "/cargos/404",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
@@ -231,7 +215,7 @@ def test_consult_non_existent_position(client, token):
 
 def test_register_position(client, token):
     response = client.post(
-        "/management/cadastrar_cargo",
+        "/cargos",
         json={"nome": "Professor"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -240,7 +224,7 @@ def test_register_position(client, token):
 
 def test_register_duplicate_position(client, token):
     response = client.post(
-        "/management/cadastrar_cargo",
+        "/cargos",
         json={"nome": "Diretor"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -249,8 +233,7 @@ def test_register_duplicate_position(client, token):
 
 def test_update_position(client, token):
     response = client.patch(
-        "/management/atualizar_cargo",
-        params={"id_cargo": 1},
+        "/cargos/1",
         json={"nome": "CEO"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -259,8 +242,7 @@ def test_update_position(client, token):
 
 def test_update_non_existent_position(client, token):
     response = client.patch(
-        "/management/atualizar_cargo",
-        params={"id_cargo": 404},
+        "/cargos/404",
         json={"nome": "CEO"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -270,9 +252,8 @@ def test_update_non_existent_position(client, token):
 def test_consult_grade(client, token):
     create_initial_grade(client, token)
     response = client.get(
-        "/management/notas",
+        "/alunos/1/notas",
         params={
-            "id_aluno": 1,
             "materia": "sociologia",
             "bimestre": 1,
             "ano": 2026,
@@ -284,9 +265,8 @@ def test_consult_grade(client, token):
 
 def test_consult_non_existent_grade(client, token):
     response = client.get(
-        "/management/notas",
+        "/alunos/1/notas",
         params={
-            "id_aluno": 1,
             "materia": "Educação Mágica",
             "bimestre": 1,
             "ano": 2026,
@@ -298,7 +278,7 @@ def test_consult_non_existent_grade(client, token):
 
 def test_consult_grade_non_existent_student(client, token):
     response = client.get(
-        "/management/notas",
+        "/alunos/404/notas",
         params={
             "id_aluno": 404,
             "materia": "Educação Mágica",
@@ -324,8 +304,7 @@ def test_register_duplicate_grade(client, token):
 def test_update_grade(client, token):
     create_initial_grade(client, token)
     response = client.patch(
-        "/management/atualizar_nota",
-        params={"id_nota": 1},
+        "/notas/1",
         json={
             "aluno": 1,
             "materia": "filosofia",
@@ -340,8 +319,7 @@ def test_update_grade(client, token):
 
 def test_update_non_existent_grade(client, token):
     response = client.patch(
-        "/management/atualizar_nota",
-        params={"id_nota": 404},
+        "/notas/404",
         json={
             "aluno": 1,
             "materia": "filosofia",
@@ -356,7 +334,7 @@ def test_update_non_existent_grade(client, token):
 
 def test_create_invite(client, token):
     response = client.post(
-        "/management/cadastrar_convite",
+        "/convites",
         json={"id_cargo": 1},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -366,7 +344,7 @@ def test_create_invite(client, token):
 
 def test_create_non_existent_position_invite(client, token):
     response = client.post(
-        "/management/cadastrar_convite",
+        "/convites",
         json={"id_cargo": 404},
         headers={"Authorization": f"Bearer {token}"},
     )

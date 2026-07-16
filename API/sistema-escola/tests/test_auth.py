@@ -9,7 +9,7 @@ USERDATA = {
 
 def criar_usuario_padrao(client, invite):
     return client.post(
-        "/auth/criar_conta",
+        "/auth/usuarios",
         json={
             "nome": USERDATA["nome"],
             "email": USERDATA["email"],
@@ -28,7 +28,7 @@ def test_create_user(client, invite):
 
 def test_create_user_wrong_email(client, invite):
     response = client.post(
-        "/auth/criar_conta",
+        "/auth/usuarios",
         json={
             "nome": "Teste",
             "email": "pytesteemail.com",
@@ -50,7 +50,7 @@ def test_create_user_duplicate_email(client, invite):
 def test_login(client, invite):
     criar_usuario_padrao(client, invite)
     response = client.post(
-        "/auth/login", json={"email": USERDATA["email"], "senha": USERDATA["senha"]}
+        "/auth/sessions", json={"email": USERDATA["email"], "senha": USERDATA["senha"]}
     )
     assert response.status_code == 200
     assert "access_token" in response.json()
@@ -58,7 +58,7 @@ def test_login(client, invite):
 
 def test_login_email_wrong(client, invite):
     response = client.post(
-        "/auth/login",
+        "/auth/sessions",
         json={"email": "wrongemail@email.com", "senha": USERDATA["senha"]},
     )
     assert response.status_code == 400
@@ -67,6 +67,6 @@ def test_login_email_wrong(client, invite):
 def test_login_password_wrong(client, invite):
     criar_usuario_padrao(client, invite)
     response = client.post(
-        "/auth/login", json={"email": USERDATA["email"], "senha": "1234"}
+        "/auth/sessions", json={"email": USERDATA["email"], "senha": "1234"}
     )
     assert response.status_code == 400

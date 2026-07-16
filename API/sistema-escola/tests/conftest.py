@@ -79,7 +79,7 @@ def student(test_engine):
 @pytest.fixture()
 def token(client):
     response = client.post(
-        "/auth/login",
+        "/auth/sessions",
         json={
             "email": settings.INITIAL_EMAIL,
             "senha": settings.INITIAL_PASSWORD,
@@ -91,7 +91,7 @@ def token(client):
 @pytest.fixture()
 def invite(client, token):
     response = client.post(
-        "/management/cadastrar_convite",
+        "/convites",
         json={"id_cargo": 1},
         headers={"Authorization": f"Bearer {token}"},
     )
