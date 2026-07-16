@@ -1,14 +1,16 @@
+from sqlalchemy.orm import Mapped, mapped_column
+
 from .base import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import String, ForeignKey
 
 
 class Usuario(Base):
     __tablename__ = "usuarios"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    nome = Column(String(100), nullable=False)
-    senha = Column(String(100), nullable=False)
-    cargo = Column(ForeignKey("cargos.id"), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    numero = Column(String(100), nullable=False)
-    admin = Column(Boolean, default=False, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    nome: Mapped[str] = mapped_column(String(100))
+    senha: Mapped[str] = mapped_column(String(100))
+    cargo: Mapped[int] = mapped_column(ForeignKey("cargos.id"))
+    email: Mapped[str] = mapped_column(String(100), unique=True)
+    numero: Mapped[str] = mapped_column(String(100))
+    admin: Mapped[bool] = mapped_column(default=False)
