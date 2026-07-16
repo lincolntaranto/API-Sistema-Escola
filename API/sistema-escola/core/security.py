@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from core.config import settings, oauth2_schema
@@ -13,10 +13,9 @@ from pwdlib import PasswordHash
 
 from datetime import datetime, timedelta, timezone
 
-from models import Convite
 from models.session import get_session
 from services.cargo import get_position_by_id_or_none
-from services.convite import get_invite_by_id_or_none
+from services.convite import get_invite_by_id_or_none, check_invitation_status
 from services.user import (
     get_user_by_id_or_none,
     get_user_by_email_or_none,
@@ -117,11 +116,7 @@ def verificar_convite(token: str, session: Session):
     cargo = get_position_by_id_or_none(id_position=id_cargo, session=session)
     if not cargo:
         raise PositionNotFound
-    usado = (
-        session.query(Convite).filter(Convite.id == id_convite, Convite.usado).first()
-    )
-    if usado:
-        raise HTTPException(status_code=401, detail="Convite já usado!")
+    check_invitation_status(id_invite=id_convite, session=session)
     convite_valido = get_invite_by_id_or_none(id_invite=id_convite, session=session)
     convite_valido.usado = True
     return cargo.id
