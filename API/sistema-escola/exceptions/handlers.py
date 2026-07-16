@@ -6,7 +6,7 @@ from exceptions.aluno_exceptions import (
     StudentAlreadyExists,
 )
 from exceptions.cargo_exceptions import PositionNotFound, PositionAlreadyExists
-from exceptions.invite_exceptions import InvalidInvite
+from exceptions.invite_exceptions import InvalidInvite, UsedInvitation
 from exceptions.nota_exceptions import GradeNotFound, GradeAlreadyExists
 from exceptions.turma_exceptions import ClassroomNotFound, ClassroomAlreadyExists
 from exceptions.user_exceptions import (
@@ -68,3 +68,7 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(InvalidInvite)
     async def _(request, exc):
         return JSONResponse(status_code=401, content={"detail": "Convite invalido!"})
+
+    @app.exception_handler(UsedInvitation)
+    async def _(request, exc):
+        return JSONResponse(status_code=401, content={"detail": "Convite já usado!"})
