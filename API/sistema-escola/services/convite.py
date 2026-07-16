@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from core.authorization import verificar_autorizacao, criar_convite
 from exceptions.cargo_exceptions import PositionNotFound
+from exceptions.invite_exceptions import UsedInvitation
 from models import Usuario, Convite, Cargo, Log
 from schemas.convite import ConviteSchema
 
@@ -36,3 +37,11 @@ def get_invite_by_id_or_none(id_invite: int, session: Session) -> Convite | None
         select(Convite).where(Convite.id == id_invite)
     ).scalar_one_or_none()
     return invite
+
+
+def check_invitation_status(id_invite: int, session: Session):
+    invite = session.execute(
+        select(Convite).where(Convite.id == id_invite, Convite.usado)
+    ).scalar_one_or_none()
+    if invite:
+        raise UsedInvitation
