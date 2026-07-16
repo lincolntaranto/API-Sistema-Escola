@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from core.security import verificar_autorizacao, criar_convite
+from core.authorization import verificar_autorizacao, criar_convite
 from exceptions.cargo_exceptions import PositionNotFound
 from models import Usuario, Convite, Cargo, Log
 from schemas.convite import ConviteSchema
@@ -29,3 +29,10 @@ def register_invite(
     session.commit()
     session.refresh(novo_convite)
     return token_convite
+
+
+def get_invite_by_id_or_none(id_invite: int, session: Session) -> Convite | None:
+    invite = session.execute(
+        select(Convite).where(Convite.id == id_invite)
+    ).scalar_one_or_none()
+    return invite
