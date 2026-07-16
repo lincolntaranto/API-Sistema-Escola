@@ -18,5 +18,5 @@ class Turma(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     nome: Mapped[str] = mapped_column(String(100))
     serie: Mapped[str] = mapped_column(String(20))
-    ano: Mapped[int] = mapped_column(nullable=False)
+    ano: Mapped[int] = mapped_column()
     turno: Mapped[Turnos] = mapped_column(Enum(Turnos))
