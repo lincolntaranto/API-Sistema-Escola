@@ -28,7 +28,7 @@ async def autenticar():
     return {"mensagem": "Rota de autenticação"}
 
 
-@auth_router.post("/criar_conta")
+@auth_router.post("/usuarios")
 async def criar_conta(
     usuario_schema: UsuarioSchema, session: Session = Depends(get_session)
 ):
@@ -57,7 +57,7 @@ async def criar_conta(
         }
 
 
-@auth_router.post("/login")
+@auth_router.post("/sessions")
 async def login(login_schema: LoginSchema, session: Session = Depends(get_session)):
     usuario = autenticar_usuario(login_schema.email, login_schema.senha, session)
     if not usuario:
@@ -91,7 +91,7 @@ async def login_form(
         return {"access_token": access_token, "token_type": "Bearer"}
 
 
-@auth_router.get("/refresh")
+@auth_router.patch("/sessions")
 async def user_refresh_token(usuario: Usuario = Depends(verify_refresh_token)):
     acess_token = criar_token(usuario.id, "access")
     return {"acess_token": acess_token, "token_type": "Bearer"}

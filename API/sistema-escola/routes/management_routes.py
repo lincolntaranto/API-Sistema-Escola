@@ -34,10 +34,10 @@ from services.turma import (
     update_classroom,
 )
 
-management_router = APIRouter(prefix="/management", tags=["management"])
+management_router = APIRouter(tags=["management"])
 
 
-@management_router.get("/alunos")
+@management_router.get("/alunos/{id_aluno}")
 async def mostrar_alunos(
     id_aluno: int,
     session: Session = Depends(get_session),
@@ -55,7 +55,7 @@ async def mostrar_alunos(
     }
 
 
-@management_router.post("/cadastrar_aluno")
+@management_router.post("/alunos")
 async def cadastrar_aluno(
     aluno_schema: AlunoSchema,
     session: Session = Depends(get_session),
@@ -74,7 +74,7 @@ async def cadastrar_aluno(
     }
 
 
-@management_router.delete("/apagar_aluno")
+@management_router.delete("/alunos/{id_aluno}")
 async def apagar_aluno(
     id_aluno: int,
     session: Session = Depends(get_session),
@@ -91,7 +91,7 @@ async def apagar_aluno(
     }
 
 
-@management_router.patch("/atualizar_aluno")
+@management_router.patch("/alunos/{id_aluno}")
 async def atualizar_aluno(
     id_aluno: int,
     aluno_update_schema: AlunoUpdateSchema,
@@ -114,7 +114,7 @@ async def atualizar_aluno(
     }
 
 
-@management_router.get("/turmas")
+@management_router.get("/turmas/{id_turma}")
 async def mostrar_turmas(
     id_turma: int,
     session: Session = Depends(get_session),
@@ -131,7 +131,7 @@ async def mostrar_turmas(
     }
 
 
-@management_router.post("/cadastrar_turma")
+@management_router.post("/turmas")
 async def cadastrar_turma(
     turma_schema: TurmaSchema,
     session: Session = Depends(get_session),
@@ -152,7 +152,7 @@ async def cadastrar_turma(
     }
 
 
-@management_router.delete("/apagar_turma")
+@management_router.delete("/turmas/{id_turma}")
 async def apagar_turma(
     id_turma: int,
     session: Session = Depends(get_session),
@@ -171,7 +171,7 @@ async def apagar_turma(
     }
 
 
-@management_router.patch("/atualizar_turma")
+@management_router.patch("/turmas/{id_turma}")
 async def atualizar_turma(
     id_turma: int,
     turma_update_schema: TurmaUpdateSchema,
@@ -197,7 +197,7 @@ async def atualizar_turma(
     }
 
 
-@management_router.get("/cargos")
+@management_router.get("/cargos/{id_cargo}")
 async def mostrar_cargos(
     id_cargo: int,
     session: Session = Depends(get_session),
@@ -209,7 +209,7 @@ async def mostrar_cargos(
     return {"nome": cargo.nome}
 
 
-@management_router.post("/cadastrar_cargo")
+@management_router.post("/cargos")
 async def cadastrar_cargo(
     cargo_schema: CargoSchema,
     session: Session = Depends(get_session),
@@ -228,7 +228,7 @@ async def cadastrar_cargo(
     }
 
 
-@management_router.delete("/apagar_cargo")
+@management_router.delete("/cargos/{id_cargo}")
 async def apagar_cargo(
     id_cargo: int,
     session: Session = Depends(get_session),
@@ -245,7 +245,7 @@ async def apagar_cargo(
     }
 
 
-@management_router.patch("/atualizar_cargo")
+@management_router.patch("/cargos/{id_cargo}")
 async def atualizar_cargo(
     id_cargo: int,
     cargo_schema: CargoSchema,
@@ -262,7 +262,7 @@ async def atualizar_cargo(
     return {"mensagem": "Cargo atualizado com sucesso!", "id": cargo.id}
 
 
-@management_router.get("/notas")
+@management_router.get("/alunos/{id_aluno}/notas")
 async def mostrar_notas(
     id_aluno: int,
     materia: str,
@@ -289,7 +289,7 @@ async def mostrar_notas(
     }
 
 
-@management_router.post("/cadastrar_nota")
+@management_router.post("/notas")
 async def cadastrar_nota(
     nota_schema: NotaSchema,
     session: Session = Depends(get_session),
@@ -311,7 +311,7 @@ async def cadastrar_nota(
     }
 
 
-@management_router.patch("/atualizar_nota")
+@management_router.patch("/notas/{id_nota}")
 async def atualizar_nota(
     id_nota: int,
     nota_update_schema: NotaUpdateSchema,
@@ -337,7 +337,7 @@ async def atualizar_nota(
     }
 
 
-@management_router.post("/cadastrar_convite")
+@management_router.post("/convites")
 async def cadastrar_convite(
     convite_schema: ConviteSchema,
     session: Session = Depends(get_session),
