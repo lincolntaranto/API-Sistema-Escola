@@ -16,4 +16,4 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="auth/login-form")
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login-form")
