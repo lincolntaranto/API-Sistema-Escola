@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.crud import update_model
-from core.security import verificar_autorizacao
+from core.authorization import verificar_autorizacao
 from exceptions.cargo_exceptions import PositionNotFound, PositionAlreadyExists
 from models import Usuario, Cargo, Log
 from schemas.cargo import CargoSchema
@@ -84,3 +84,10 @@ def update_position(
     session.commit()
     session.refresh(cargo)
     return cargo
+
+
+def get_position_by_id_or_none(id_position: int, session: Session) -> Cargo | None:
+    position = session.execute(
+        select(Cargo).where(Cargo.id == id_position)
+    ).scalar_one_or_none()
+    return position
