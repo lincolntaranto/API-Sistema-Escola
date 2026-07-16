@@ -6,8 +6,14 @@ from exceptions.aluno_exceptions import (
     StudentAlreadyExists,
 )
 from exceptions.cargo_exceptions import PositionNotFound, PositionAlreadyExists
+from exceptions.invite_exceptions import InvalidInvite
 from exceptions.nota_exceptions import GradeNotFound, GradeAlreadyExists
 from exceptions.turma_exceptions import ClassroomNotFound, ClassroomAlreadyExists
+from exceptions.user_exceptions import (
+    UserNotFound,
+    AccessDenied,
+    InsufficientPermission,
+)
 
 
 def register_exception_handlers(app: FastAPI):
@@ -44,3 +50,21 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(GradeAlreadyExists)
     async def _(request, exc):
         return JSONResponse(status_code=400, content={"detail": "Nota já cadastrada!"})
+
+    @app.exception_handler(UserNotFound)
+    async def _(request, exc):
+        return JSONResponse(status_code=404, content={"detail": "Usuário inexistente!"})
+
+    @app.exception_handler(AccessDenied)
+    async def _(request, exc):
+        return JSONResponse(status_code=401, content={"detail": "Acesso negado!"})
+
+    @app.exception_handler(InsufficientPermission)
+    async def _(request, exc):
+        return JSONResponse(
+            status_code=403, content={"detail": "Permissão insuficiente!"}
+        )
+
+    @app.exception_handler(InvalidInvite)
+    async def _(request, exc):
+        return JSONResponse(status_code=401, content={"detail": "Convite invalido!"})
