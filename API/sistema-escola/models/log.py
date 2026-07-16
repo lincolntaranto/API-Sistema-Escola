@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
+from typing import Optional
 
-from sqlalchemy import Column, Integer, ForeignKey, String, DateTime
+from sqlalchemy import ForeignKey, String, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 
@@ -8,11 +10,11 @@ from .base import Base
 class Log(Base):
     __tablename__ = "logs"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    id_usuario = Column(ForeignKey("usuarios.id"), nullable=False)
-    id_aluno = Column(ForeignKey("alunos.id"))
-    acao = Column(String(100), nullable=False)
-    descricao = Column(String(100), nullable=True)
-    data_hora = Column(
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id_usuario: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
+    id_aluno: Mapped[Optional[int]] = mapped_column(ForeignKey("alunos.id"))
+    acao: Mapped[str] = mapped_column(String(100), nullable=False)
+    descricao: Mapped[Optional[str]] = mapped_column(String(100))
+    data_hora: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
