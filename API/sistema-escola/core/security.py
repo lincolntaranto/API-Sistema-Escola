@@ -46,7 +46,9 @@ ALGORITHM = "HS256"
 
 
 def criar_token(
-    id_usuario, duracao_token=timedelta(int(settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    id_usuario,
+    type_token: str,
+    duracao_token=timedelta(minutes=int(settings.ACCESS_TOKEN_EXPIRE_MINUTES)),
 ):
     data_expiracao = datetime.now(timezone.utc) + duracao_token
     dic_info = {"sub": str(id_usuario), "exp": data_expiracao}
