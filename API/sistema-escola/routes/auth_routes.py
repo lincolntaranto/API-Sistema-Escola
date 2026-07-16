@@ -9,7 +9,7 @@ from schemas.login import LoginSchema
 from core.security import (
     get_password_hash,
     autenticar_usuario,
-    verificar_token,
+    verify_refresh_token,
     verificar_convite,
 )
 from core.security import criar_token
@@ -65,8 +65,8 @@ async def login(login_schema: LoginSchema, session: Session = Depends(get_sessio
             status_code=400, detail="usuário não encontrado ou senha incorreta."
         )
     else:
-        access_token = criar_token(usuario.id)
-        refresh_token = criar_token(usuario.id, timedelta(days=5))
+        access_token = criar_token(usuario.id, "access")
+        refresh_token = criar_token(usuario.id, "refresh", timedelta(days=5))
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -87,11 +87,11 @@ async def login_form(
             status_code=400, detail="usuário não encontrado ou senha incorreta."
         )
     else:
-        access_token = criar_token(usuario.id)
+        access_token = criar_token(usuario.id, "access")
         return {"access_token": access_token, "token_type": "Bearer"}
 
 
 @auth_router.get("/refresh")
-async def user_refresh_token(usuario: Usuario = Depends(verificar_token)):
-    acess_token = criar_token(usuario.id)
+async def user_refresh_token(usuario: Usuario = Depends(verify_refresh_token)):
+    acess_token = criar_token(usuario.id, "access")
     return {"acess_token": acess_token, "token_type": "Bearer"}
