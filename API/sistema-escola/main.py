@@ -7,6 +7,6 @@ from routes.management_routes import management_router
 app = FastAPI()
 
 
-app.include_router(auth_router)
-app.include_router(management_router)
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(management_router, prefix="/api/v1")
 register_exception_handlers(app)
