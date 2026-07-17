@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from core.crud import update_model
@@ -115,3 +115,29 @@ def update_student(
     session.commit()
     session.refresh(aluno)
     return aluno
+
+
+def list_students(
+    session: Session,
+    turma: int | None = None,
+    nome: str | None = None,
+    pagina: int = 1,
+    tamanho: int = 20,
+) -> tuple[list[Aluno], int]:
+    query = select(Aluno).where(Aluno.deletado.is_(False))
+
+    if turma is not None:
+        query = query.where(Aluno.turma == turma)
+    if nome is not None:
+        query = query.where(Aluno.nome.ilike(f"%{nome}%"))
+
+    total = (
+        session.execute(select(func.count()).select_from(query.subquery())).scalar()
+        or 0
+    )
+
+    offset = (pagina - 1) * tamanho
+    query = query.offset(offset).limit(tamanho)
+
+    alunos = list(session.execute(query).scalars().all())
+    return alunos, total
