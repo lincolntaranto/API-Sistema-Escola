@@ -30,9 +30,16 @@ sistema-escola/
 ├── alembic/                  # Migrations
 ├── core/
 │   ├── __init__.py
+│   ├── authorization.py      # Verificação de autorização por cargo
 │   ├── config.py             # Configurações da aplicação
-│   ├── security.py           # JWT, autenticação e autorização
+│   ├── security.py           # JWT e autenticação
 │   └── crud.py               # Funções auxiliares de CRUD
+│
+├── exceptions/
+│   ├── __init__.py
+│   ├── aluno_exceptions.py    # Exceções de domínio de aluno
+│   ├── handlers.py            # Registro centralizado dos exception handlers
+│   └── nota_exceptions.py     # Exceções de domínio de nota
 │
 ├── models/
 │   ├── __init__.py
@@ -46,10 +53,18 @@ sistema-escola/
 │   ├── turma.py                # Model de turmas
 │   └── usuario.py              # Model de usuários
 │
-├── routes/
+├── routers/
 │   ├── __init__.py
 │   ├── auth_routes.py         # Rotas de autenticação
 │   └── management_routes.py   # Rotas de gerenciamento
+│
+├── services/
+│   ├── __init__.py
+│   ├── aluno.py                # Regras de negócio de aluno
+│   ├── cargo.py                # Regras de negócio de cargo
+│   ├── convite.py              # Regras de negócio de convite
+│   ├── nota.py                 # Regras de negócio de nota
+│   └── turma.py                # Regras de negócio de turma
 │
 ├── schemas/
 │   ├── aluno/
@@ -72,10 +87,11 @@ sistema-escola/
 │   └── usuario.py             # Schema de usuário
 │
 ├── tests/
-│   ├── conftest.py            # Fixtures base do pytest (banco, client, auth)
-│   └── test_auth.py           # Testes de autenticação
+│   ├── conftest.py            # Fixtures base do pytest
+│   ├── test_auth.py           # Testes de autenticação
+│   └── test_management.py     # Testes das rotas de gerenciamento
 │
-├── dados_iniciais.py          # Seed de dados iniciais (cargo, superusuário)
+├── dados_iniciais.py          # Seed de dados iniciais
 ├── main.py                    # Entrypoint da aplicação
 ├── Dockerfile                 # Imagem Docker da API
 ├── docker-compose.yml         # Orquestra API + banco
@@ -86,6 +102,19 @@ sistema-escola/
 ├── requirements.txt           # Dependências do projeto
 └── README.md
 ```
+
+---
+
+## Arquitetura
+
+O projeto segue uma arquitetura em camadas:
+
+- **`routers/`** — recebem a requisição HTTP, chamam o service correspondente e devolvem a resposta. Não acessam o banco diretamente nem tratam exceções de domínio manualmente (isso é feito pelos handlers globais).
+- **`services/`** — concentram as regras de negócio: consultas ao banco, validações, criação de logs de auditoria e commits. Nenhum acesso ao banco deve acontecer diretamente nos routers.
+- **`exceptions/`** — exceções de domínio (ex: `StudentNotFound`, `GradeNotFound`), levantadas pelos services e tratadas globalmente via `exceptions/handlers.py`, registrado em `main.py`.
+- **`models/`** — mapeamento ORM das tabelas, usando a sintaxe `Mapped`/`mapped_column` do SQLAlchemy 2.0.
+
+Ações sensíveis (cadastro, atualização e remoção de registros) geram um registro na tabela `Log`, e a exclusão de alunos é feita via **soft delete** (campo `deletado`), preservando o histórico de auditoria.
 
 ---
 
@@ -114,7 +143,7 @@ INITIAL_PASSWORD=sua_senha_inicial
 
 ---
 
-## Rodando com Docker (recomendado)
+## Rodando com Docker
 
 ### 1. Suba os containers
 
@@ -156,57 +185,61 @@ popular cargo/superusuário automaticamente.
 
 ## Rotas
 
-### Auth — `/auth`
+Todas as rotas da API são versionadas e vivem sob o prefixo `/api/v1`, para permitir mudanças futuras (`/api/v2`) sem quebrar clientes que já dependem do contrato atual.
+
+### Auth — `/api/v1/auth`
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| POST | `/auth/criar_conta` | Cria um novo usuário (requer convite) | ❌ |
-| POST | `/auth/login` | Login com email e senha, retorna JWT | ❌ |
-| POST | `/auth/login-form` | Login via formulário OAuth2 (para o `/docs`) | ❌ |
-| GET | `/auth/refresh` | Atualiza o token | ✅ |
+| GET | `/api/v1/auth/` | Rota de health-check da autenticação | ❌ |
+| POST | `/api/v1/auth/usuarios` | Cria um novo usuário (requer convite) | ❌ |
+| POST | `/api/v1/auth/sessions` | Login com email e senha, retorna access e refresh token | ❌ |
+| POST | `/api/v1/auth/login-form` | Login via formulário OAuth2 (usado pelo `/docs`) | ❌ |
+| PATCH | `/api/v1/auth/sessions` | Gera um novo access token a partir do refresh token | ✅ (refresh token) |
 
-### Management — `/management`
+### Management — `/api/v1`
 
 #### Alunos
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| GET | `/management/alunos` | Consulta um aluno pelo ID | ✅ |
-| POST | `/management/cadastrar_aluno` | Cadastra um novo aluno | ✅ |
-| DELETE | `/management/apagar_aluno` | Remove um aluno do sistema | ✅ |
-| PATCH | `/management/atualizar_aluno` | Atualiza os dados de um aluno | ✅ |
+| GET | `/api/v1/alunos/{id_aluno}` | Consulta um aluno pelo ID | ✅ |
+| GET | `/api/v1/alunos` | Lista alunos com filtros (`turma`, `nome`) e paginação (`pagina`, `tamanho`) | ✅ |
+| POST | `/api/v1/alunos` | Cadastra um novo aluno | ✅ |
+| DELETE | `/api/v1/alunos/{id_aluno}` | Remove um aluno do sistema (soft delete) | ✅ |
+| PATCH | `/api/v1/alunos/{id_aluno}` | Atualiza os dados de um aluno | ✅ |
 
 #### Turmas
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| GET | `/management/turmas` | Consulta uma turma pelo ID | ✅ |
-| POST | `/management/cadastrar_turma` | Cadastra uma nova turma | ✅ |
-| DELETE | `/management/apagar_turma` | Remove uma turma do sistema | ✅ |
-| PATCH | `/management/atualizar_turma` | Atualiza os dados de uma turma | ✅ |
+| GET | `/api/v1/turmas/{id_turma}` | Consulta uma turma pelo ID | ✅ |
+| POST | `/api/v1/turmas` | Cadastra uma nova turma | ✅ |
+| DELETE | `/api/v1/turmas/{id_turma}` | Remove uma turma do sistema | ✅ |
+| PATCH | `/api/v1/turmas/{id_turma}` | Atualiza os dados de uma turma | ✅ |
 
 #### Cargos
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| GET | `/management/cargos` | Consulta um cargo pelo ID | ✅ |
-| POST | `/management/cadastrar_cargo` | Cadastra um novo cargo | ✅ |
-| DELETE | `/management/apagar_cargo` | Remove um cargo do sistema | ✅ |
-| PATCH | `/management/atualizar_cargo` | Atualiza os dados de um cargo | ✅ |
+| GET | `/api/v1/cargos/{id_cargo}` | Consulta um cargo pelo ID | ✅ |
+| POST | `/api/v1/cargos` | Cadastra um novo cargo | ✅ |
+| DELETE | `/api/v1/cargos/{id_cargo}` | Remove um cargo do sistema | ✅ |
+| PATCH | `/api/v1/cargos/{id_cargo}` | Atualiza os dados de um cargo | ✅ |
 
 #### Notas
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| GET | `/management/notas` | Consulta notas de um aluno | ✅ |
-| POST | `/management/cadastrar_nota` | Cadastra uma nova nota | ✅ |
-| PATCH | `/management/atualizar_nota` | Atualiza uma nota existente | ✅ |
+| GET | `/api/v1/alunos/{id_aluno}/notas` | Consulta notas de um aluno (filtra por `materia`, `bimestre`, `ano`) | ✅ |
+| POST | `/api/v1/notas` | Cadastra uma nova nota | ✅ |
+| PATCH | `/api/v1/notas/{id_nota}` | Atualiza uma nota existente | ✅ |
 
 #### Convites
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| POST | `/management/cadastrar_convite` | Cria um convite para cadastro de usuário | ✅ |
+| POST | `/api/v1/convites` | Cria um convite para cadastro de usuário | ✅ |
 
 ---
 
