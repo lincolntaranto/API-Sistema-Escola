@@ -18,6 +18,7 @@ from services.aluno import (
     register_student,
     delete_student,
     update_student,
+    list_students,
 )
 from services.cargo import (
     consult_position,
@@ -52,6 +53,40 @@ async def mostrar_alunos(
         "data_nascimento": aluno.data_nascimento,
         "responsavel": aluno.nome_responsavel,
         "celular_responsavel": aluno.celular_responsavel,
+    }
+
+
+@management_router.get("/alunos")
+async def listar_alunos(
+    turma: int | None = None,
+    nome: str | None = None,
+    pagina: int = 1,
+    tamanho: int = 20,
+    session: Session = Depends(get_session),
+    usuario: Usuario = Depends(verificar_token),
+):
+    """Rota para listar alunos com filtros e paginação."""
+    alunos, total = list_students(
+        session=session,
+        turma=turma,
+        nome=nome,
+        pagina=pagina,
+        tamanho=tamanho,
+    )
+    return {
+        "items": [
+            {
+                "id": aluno.id,
+                "nome": aluno.nome,
+                "turma": aluno.turma,
+                "data_nascimento": aluno.data_nascimento,
+            }
+            for aluno in alunos
+        ],
+        "pagina": pagina,
+        "tamanho": tamanho,
+        "total": total,
+        "total_paginas": (total + tamanho - 1) // tamanho,
     }
 
 
