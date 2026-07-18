@@ -20,3 +20,7 @@ class EmailAlreadyRegistered(Exception):
     """Levantada quando o email já esta cadastrado."""
 
     pass
+
+
+class UserNotFoundOrIncorrectPassword(Exception):
+    """Levantada quando o usuário não é encontrado ou a senha esta incorreta."""

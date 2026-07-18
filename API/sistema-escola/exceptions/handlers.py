@@ -14,6 +14,7 @@ from exceptions.user_exceptions import (
     AccessDenied,
     InsufficientPermission,
     EmailAlreadyRegistered,
+    UserNotFoundOrIncorrectPassword,
 )
 
 
@@ -77,3 +78,10 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(EmailAlreadyRegistered)
     async def _(request, exc):
         return JSONResponse(status_code=400, content={"detail": "Email já cadastrado!"})
+
+    @app.exception_handler(UserNotFoundOrIncorrectPassword)
+    async def _(request, exc):
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Usuário inexistente ou senha incorreta!"},
+        )
