@@ -6,18 +6,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from schemas.login import LoginSchema
-from core.security import (
-    get_password_hash,
-    autenticar_usuario,
-    verify_refresh_token,
-    verificar_convite,
-)
+from services.auth import verify_refresh_token, autenticar_usuario
 from core.security import criar_token
 
 from models import Usuario
 from models.session import get_session
 
 from schemas.usuario import UsuarioSchema
+from services.user import create_user
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -32,29 +28,13 @@ async def autenticar():
 async def criar_conta(
     usuario_schema: UsuarioSchema, session: Session = Depends(get_session)
 ):
-    usuario = (
-        session.query(Usuario).filter(Usuario.email == usuario_schema.email).first()
-    )
-    if usuario:
-        raise HTTPException(status_code=400, detail="email já cadastrado!")
-    else:
-        cargo = int(verificar_convite(usuario_schema.convite, session))
-        senha_criptografada = get_password_hash(usuario_schema.senha)
-        novo_usuario = Usuario(
-            nome=usuario_schema.nome,
-            senha=senha_criptografada,
-            cargo=cargo,
-            email=usuario_schema.email,
-            numero=usuario_schema.numero,
-        )
-        session.add(novo_usuario)
-        session.commit()
-        session.refresh(novo_usuario)
-        return {
-            "mensagem": "usuário cadastrado com sucesso!",
-            "id": novo_usuario.id,
-            "email": novo_usuario.email,
-        }
+    novo_usuario = create_user(usuario_schema=usuario_schema, session=session)
+
+    return {
+        "mensagem": "usuário cadastrado com sucesso!",
+        "id": novo_usuario.id,
+        "email": novo_usuario.email,
+    }
 
 
 @auth_router.post("/sessions")
