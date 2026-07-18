@@ -25,7 +25,7 @@ def get_user_by_id_or_none(id_user: int, session: Session) -> Usuario | None:
     return user
 
 
-def get_user_by_email_or_none(email: int, session: Session) -> Usuario | None:
+def get_user_by_email_or_none(email: str, session: Session) -> Usuario | None:
     user = session.execute(
         select(Usuario).where(Usuario.email == email)
     ).scalar_one_or_none()
