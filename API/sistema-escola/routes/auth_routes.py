@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from sqlalchemy.orm import Session
@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 from schemas.login import LoginSchema
 from services.auth import (
     verify_refresh_token,
-    autenticar_usuario,
     create_user,
     login_user,
+    login_user_form,
 )
 from core.security import criar_token
 
@@ -55,16 +55,9 @@ async def login_form(
     dados_formulario: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),
 ):
-    usuario = autenticar_usuario(
-        dados_formulario.username, dados_formulario.password, session
-    )
-    if not usuario:
-        raise HTTPException(
-            status_code=400, detail="usuário não encontrado ou senha incorreta."
-        )
-    else:
-        access_token = criar_token(usuario.id, "access")
-        return {"access_token": access_token, "token_type": "Bearer"}
+    login_f = login_user_form(form_data=dados_formulario, session=session)
+
+    return {"access_token": login_f["access_token"], "token_type": "Bearer"}
 
 
 @auth_router.patch("/sessions")
