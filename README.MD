@@ -38,8 +38,12 @@ sistema-escola/
 ├── exceptions/
 │   ├── __init__.py
 │   ├── aluno_exceptions.py    # Exceções de domínio de aluno
+│   ├── cargo_exceptions.py    # Exceções de domínio de cargo
+│   ├── invite_exceptions.py   # Exceções de domínio de convite
+│   ├── nota_exceptions.py     # Exceções de domínio de nota
+│   ├── turma_exceptions.py    # Exceções de domínio de turma
 │   ├── handlers.py            # Registro centralizado dos exception handlers
-│   └── nota_exceptions.py     # Exceções de domínio de nota
+│   └── user_exceptions.pt     # Exceções de domínio de usuario
 │
 ├── models/
 │   ├── __init__.py
@@ -61,10 +65,12 @@ sistema-escola/
 ├── services/
 │   ├── __init__.py
 │   ├── aluno.py                # Regras de negócio de aluno
+│   ├── auth.py                 # Regras de negócio de autenticação
 │   ├── cargo.py                # Regras de negócio de cargo
 │   ├── convite.py              # Regras de negócio de convite
 │   ├── nota.py                 # Regras de negócio de nota
-│   └── turma.py                # Regras de negócio de turma
+│   ├── turma.py                # Regras de negócio de turma
+│   └── user.py                 # Regras de negócio de usuario
 │
 ├── schemas/
 │   ├── aluno/
