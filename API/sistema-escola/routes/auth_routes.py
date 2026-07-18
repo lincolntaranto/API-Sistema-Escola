@@ -43,12 +43,9 @@ async def criar_conta(
 async def login(login_schema: LoginSchema, session: Session = Depends(get_session)):
     login_u = login_user(login_schema=login_schema, session=session)
 
-    access_token = login_u["access_token"]
-    refresh_token = [login_u["refresh_token"]]
-
     return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
+        "access_token": login_u["access_token"],
+        "refresh_token": login_u["refresh_token"],
         "token_type": "Bearer",
     }
 
