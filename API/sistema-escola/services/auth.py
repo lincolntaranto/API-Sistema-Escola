@@ -56,12 +56,12 @@ def verify_refresh_token(
     return user
 
 
-def autenticar_usuario(email, senha, session):
+def autenticar_usuario(email, senha, session) -> Usuario | None:
     usuario = get_user_by_email_or_none(email=email, session=session)
     if not usuario:
-        return False
+        return None
     elif not verify_password(senha, usuario.senha):
-        return False
+        return None
     return usuario
 
 
