@@ -1,25 +1,10 @@
-from fastapi import Depends
-from sqlalchemy.orm import Session
-
-from core.config import settings, oauth2_schema
-from exceptions.cargo_exceptions import PositionNotFound
-from exceptions.invite_exceptions import InvalidInvite
-from exceptions.user_exceptions import AccessDenied
+from core.config import settings
 
 import jwt
-from jwt import InvalidTokenError
 
 from pwdlib import PasswordHash
 
 from datetime import datetime, timedelta, timezone
-
-from models.session import get_session
-from services.cargo import get_position_by_id_or_none
-from services.convite import get_invite_by_id_or_none, check_invitation_status
-from services.user import (
-    get_user_by_id_or_none,
-    get_user_by_email_or_none,
-)
 
 password_hash = PasswordHash.recommended()
 
@@ -61,62 +46,3 @@ def criar_token(
     dic_info = {"sub": str(id_usuario), "exp": data_expiracao, "type": type_token}
     jwt_encoded = jwt.encode(dic_info, settings.SECRET_KEY, ALGORITHM)
     return jwt_encoded
-
-
-def verificar_token(
-    token: str = Depends(oauth2_schema), session: Session = Depends(get_session)
-):
-    try:
-        dict_info = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
-        id_usuario = int(dict_info.get("sub"))
-        type_token = dict_info.get("type")
-    except InvalidTokenError:
-        raise AccessDenied
-    if type_token != "access":
-        raise AccessDenied
-    usuario = get_user_by_id_or_none(id_user=id_usuario, session=session)
-    if not usuario:
-        raise AccessDenied
-    return usuario
-
-
-def verify_refresh_token(
-    refresh_token: str = Depends(oauth2_schema), session: Session = Depends(get_session)
-):
-    try:
-        dict_info = jwt.decode(refresh_token, settings.SECRET_KEY, ALGORITHM)
-        id_user = int(dict_info.get("sub"))
-        type_token = dict_info.get("type")
-    except InvalidTokenError:
-        raise AccessDenied
-    if type_token != "refresh":
-        raise AccessDenied
-    user = get_user_by_id_or_none(id_user=id_user, session=session)
-    if not user:
-        raise AccessDenied
-    return user
-
-
-def autenticar_usuario(email, senha, session):
-    usuario = get_user_by_email_or_none(email=email, session=session)
-    if not usuario:
-        return False
-    elif not verify_password(senha, usuario.senha):
-        return False
-    return usuario
-
-
-def verificar_convite(token: str, session: Session):
-    try:
-        dict_info = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
-        id_convite = int(dict_info.get("id"))
-        id_cargo = int(dict_info.get("cargo"))
-    except InvalidTokenError:
-        raise InvalidInvite
-    cargo = get_position_by_id_or_none(id_position=id_cargo, session=session)
-    if not cargo:
-        raise PositionNotFound
-    check_invitation_status(id_invite=id_convite, session=session)
-    convite_valido = get_invite_by_id_or_none(id_invite=id_convite, session=session)
-    convite_valido.usado = True
-    return cargo.id
