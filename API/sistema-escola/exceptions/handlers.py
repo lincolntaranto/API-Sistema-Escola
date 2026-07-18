@@ -13,6 +13,7 @@ from exceptions.user_exceptions import (
     UserNotFound,
     AccessDenied,
     InsufficientPermission,
+    EmailAlreadyRegistered,
 )
 
 
@@ -72,3 +73,7 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(UsedInvitation)
     async def _(request, exc):
         return JSONResponse(status_code=401, content={"detail": "Convite já usado!"})
+
+    @app.exception_handler(EmailAlreadyRegistered)
+    async def _(request, exc):
+        return JSONResponse(status_code=400, content={"detail": "Email já cadastrado!"})

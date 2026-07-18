@@ -14,3 +14,9 @@ class InsufficientPermission(Exception):
     """Levantada quando a permimssão é insuficiente."""
 
     pass
+
+
+class EmailAlreadyRegistered(Exception):
+    """Levantada quando o email já esta cadastrado."""
+
+    pass
