@@ -11,7 +11,7 @@ from schemas.nota.nota import NotaSchema
 from schemas.nota.nota_update import NotaUpdateSchema
 from schemas.turma.turma import TurmaSchema
 from schemas.turma.turma_update import TurmaUpdateSchema
-from core.security import verificar_token
+from services.auth import verificar_token
 from core.authorization import verificar_autorizacao
 from services.aluno import (
     consult_student_by_id,
