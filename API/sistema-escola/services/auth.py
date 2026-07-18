@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import jwt
 from fastapi import Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from jwt import InvalidTokenError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -95,3 +96,11 @@ def login_user(login_schema: LoginSchema, session: Session) -> dict:
         "access_token": criar_token(usuario.id, "access"),
         "refresh_token": criar_token(usuario.id, "refresh", timedelta(days=5)),
     }
+
+
+def login_user_form(form_data: OAuth2PasswordRequestForm, session: Session) -> dict:
+    usuario = autenticar_usuario(form_data.username, form_data.password, session)
+    if not usuario:
+        raise UserNotFoundOrIncorrectPassword
+    access_token = criar_token(usuario.id, "access")
+    return {"access_token": access_token, "token_type": "Bearer"}
