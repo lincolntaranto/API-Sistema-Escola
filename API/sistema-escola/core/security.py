@@ -37,12 +37,12 @@ def get_password_hash(password: str) -> str:
 ALGORITHM = "HS256"
 
 
-def criar_token(
-    id_usuario,
+def create_token(
+    user_id,
     type_token: str,
-    duracao_token=timedelta(minutes=int(settings.ACCESS_TOKEN_EXPIRE_MINUTES)),
+    token_duration=timedelta(minutes=int(settings.ACCESS_TOKEN_EXPIRE_MINUTES)),
 ):
-    data_expiracao = datetime.now(timezone.utc) + duracao_token
-    dic_info = {"sub": str(id_usuario), "exp": data_expiracao, "type": type_token}
+    expiration_date = datetime.now(timezone.utc) + token_duration
+    dic_info = {"sub": str(user_id), "exp": expiration_date, "type": type_token}
     jwt_encoded = jwt.encode(dic_info, settings.SECRET_KEY, ALGORITHM)
     return jwt_encoded
