@@ -21,10 +21,10 @@ from services.student import (
     list_students,
 )
 from services.role import (
-    consult_position,
-    register_position,
-    delete_position,
-    update_position,
+    consult_role,
+    register_role,
+    delete_role,
+    update_role,
 )
 from services.invite import register_invite
 from services.grade import consult_grade, register_grade, update_grade
@@ -240,7 +240,7 @@ async def get_role(
 ):
     """Rota para consultar cargos no sistema."""
 
-    role = consult_position(role_id=role_id, session=session, user=user)
+    role = consult_role(role_id=role_id, session=session, user=user)
     return {"name": role.name}
 
 
@@ -253,7 +253,7 @@ async def create_role(
     """Rota para cadastrar um cargo no sistema."""
 
     verify_authorization(user)
-    new_role = register_position(role_schema=role_schema, session=session, user=user)
+    new_role = register_role(role_schema=role_schema, session=session, user=user)
     return {
         "mensagem": "Cargo cadastrado com sucesso!",
         "id": new_role.id,
@@ -270,7 +270,7 @@ async def remove_role(
     """Rota para apagar um cargo do sistema."""
 
     verify_authorization(user)
-    role = delete_position(role_id=role_id, session=session, user=user)
+    role = delete_role(role_id=role_id, session=session, user=user)
     return {
         "mensagem": "Cargo deletado com sucesso!",
         "id": role.id,
@@ -288,7 +288,7 @@ async def patch_role(
     """Rota para atualizar um cargo no sistema."""
 
     verify_authorization(user)
-    role = update_position(
+    role = update_role(
         role_id=role_id, role_schema=role_schema, session=session, user=user
     )
 
