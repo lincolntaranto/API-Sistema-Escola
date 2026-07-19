@@ -1,10 +1,11 @@
-from .aluno import Aluno
-from .cargo import Cargo
-from .nota import Nota
-from .turma import Turma
-from .usuario import Usuario
+from .student import Student
+from .role import Role
+from .grade import Grade
+from .classroom import Classroom
+from .user import User
 from .log import Log
 from .base import Base
-from .convites import Convite
+from .invite import Invite
 
-__all__ = ["Aluno", "Cargo", "Nota", "Turma", "Usuario", "Log", "Base", "Convite"]
+
+__all__ = ["Student", "Role", "Grade", "Classroom", "User", "Log", "Base", "Invite"]

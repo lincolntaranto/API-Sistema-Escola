@@ -11,10 +11,10 @@ class Log(Base):
     __tablename__ = "logs"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    id_usuario: Mapped[int] = mapped_column(ForeignKey("usuarios.id"))
-    id_aluno: Mapped[Optional[int]] = mapped_column(ForeignKey("alunos.id"))
-    acao: Mapped[str] = mapped_column(String(100))
-    descricao: Mapped[Optional[str]] = mapped_column(String(100))
-    data_hora: Mapped[datetime] = mapped_column(
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    student_id: Mapped[Optional[int]] = mapped_column(ForeignKey("students.id"))
+    action: Mapped[str] = mapped_column(String(100))
+    description: Mapped[Optional[str]] = mapped_column(String(100))
+    timestamp: Mapped[datetime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc)
     )

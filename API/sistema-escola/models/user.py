@@ -4,13 +4,13 @@ from .base import Base
 from sqlalchemy import String, ForeignKey
 
 
-class Usuario(Base):
-    __tablename__ = "usuarios"
+class User(Base):
+    __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    nome: Mapped[str] = mapped_column(String(100))
-    senha: Mapped[str] = mapped_column(String(100))
-    cargo: Mapped[int] = mapped_column(ForeignKey("cargos.id"))
+    name: Mapped[str] = mapped_column(String(100))
+    password: Mapped[str] = mapped_column(String(100))
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
     email: Mapped[str] = mapped_column(String(100), unique=True)
-    numero: Mapped[str] = mapped_column(String(100))
+    phone: Mapped[str] = mapped_column(String(100))
     admin: Mapped[bool] = mapped_column(default=False)
