@@ -7,13 +7,13 @@ from .base import Base
 
 
 class Shifts(enum.Enum):
-    manha = "manhã"
-    tarde = "tarde"
-    noite = "noite"
+    morning = "morning"
+    afternoon = "afternoon"
+    night = "night"
 
 
-class Turma(Base):
-    __tablename__ = "turmas"
+class Classroom(Base):
+    __tablename__ = "classrooms"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100))
