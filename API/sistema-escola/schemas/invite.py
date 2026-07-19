@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class ConviteSchema(BaseModel):
+class InviteSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id_cargo: int
+    role_id: int
