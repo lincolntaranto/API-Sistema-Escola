@@ -8,35 +8,35 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.config import oauth2_schema, settings
-from core.security import ALGORITHM, verify_password, get_password_hash, criar_token
+from core.security import ALGORITHM, verify_password, get_password_hash, create_token
 from exceptions.user_exceptions import (
     AccessDenied,
     EmailAlreadyRegistered,
     UserNotFoundOrIncorrectPassword,
 )
-from models import Usuario
+from models import User
 from models.session import get_session
 from schemas.login import LoginSchema
-from schemas.usuario import UsuarioSchema
-from services.convite import verificar_convite
+from schemas.user import UserSchema
+from services.invite import verify_invite
 from services.user import get_user_by_id_or_none, get_user_by_email_or_none
 
 
-def verificar_token(
+def verify_token(
     token: str = Depends(oauth2_schema), session: Session = Depends(get_session)
 ):
     try:
         dict_info = jwt.decode(token, settings.SECRET_KEY, ALGORITHM)
-        id_usuario = int(dict_info.get("sub"))
+        user_id = int(dict_info.get("sub"))
         type_token = dict_info.get("type")
     except InvalidTokenError:
         raise AccessDenied
     if type_token != "access":
         raise AccessDenied
-    usuario = get_user_by_id_or_none(id_user=id_usuario, session=session)
-    if not usuario:
+    user = get_user_by_id_or_none(user_id=user_id, session=session)
+    if not user:
         raise AccessDenied
-    return usuario
+    return user
 
 
 def verify_refresh_token(
@@ -44,63 +44,63 @@ def verify_refresh_token(
 ):
     try:
         dict_info = jwt.decode(refresh_token, settings.SECRET_KEY, ALGORITHM)
-        id_user = int(dict_info.get("sub"))
+        user_id = int(dict_info.get("sub"))
         type_token = dict_info.get("type")
     except InvalidTokenError:
         raise AccessDenied
     if type_token != "refresh":
         raise AccessDenied
-    user = get_user_by_id_or_none(id_user=id_user, session=session)
+    user = get_user_by_id_or_none(user_id=user_id, session=session)
     if not user:
         raise AccessDenied
     return user
 
 
-def autenticar_usuario(email, senha, session) -> Usuario | None:
-    usuario = get_user_by_email_or_none(email=email, session=session)
-    if not usuario:
+def authenticate_user(email, password, session) -> User | None:
+    user = get_user_by_email_or_none(email=email, session=session)
+    if not user:
         return None
-    elif not verify_password(senha, usuario.senha):
+    elif not verify_password(password, user.password):
         return None
-    return usuario
+    return user
 
 
-def create_user(usuario_schema: UsuarioSchema, session: Session) -> Usuario:
-    usuario = session.execute(
-        select(Usuario).where(Usuario.email == usuario_schema.email)
+def create_user(user_schema: UserSchema, session: Session) -> User:
+    user = session.execute(
+        select(User).where(User.email == user_schema.email)
     ).scalar_one_or_none()
-    if usuario:
+    if user:
         raise EmailAlreadyRegistered
     else:
-        cargo = int(verificar_convite(usuario_schema.convite, session))
-        senha_criptografada = get_password_hash(usuario_schema.senha)
-        novo_usuario = Usuario(
-            nome=usuario_schema.nome,
-            senha=senha_criptografada,
-            cargo=cargo,
-            email=usuario_schema.email,
-            numero=usuario_schema.numero,
+        role_id = int(verify_invite(user_schema.invite, session))
+        hashed_password = get_password_hash(user_schema.password)
+        new_user = User(
+            name=user_schema.name,
+            password=hashed_password,
+            role_id=role_id,
+            email=user_schema.email,
+            phone=user_schema.phone,
         )
-        session.add(novo_usuario)
+        session.add(new_user)
         session.commit()
-        session.refresh(novo_usuario)
-        return novo_usuario
+        session.refresh(new_user)
+        return new_user
 
 
 def login_user(login_schema: LoginSchema, session: Session) -> dict:
-    usuario = autenticar_usuario(login_schema.email, login_schema.senha, session)
-    if not usuario:
+    user = authenticate_user(login_schema.email, login_schema.password, session)
+    if not user:
         raise UserNotFoundOrIncorrectPassword
 
     return {
-        "access_token": criar_token(usuario.id, "access"),
-        "refresh_token": criar_token(usuario.id, "refresh", timedelta(days=5)),
+        "access_token": create_token(user.id, "access"),
+        "refresh_token": create_token(user.id, "refresh", timedelta(days=5)),
     }
 
 
 def login_user_form(form_data: OAuth2PasswordRequestForm, session: Session) -> dict:
-    usuario = autenticar_usuario(form_data.username, form_data.password, session)
-    if not usuario:
+    user = authenticate_user(form_data.username, form_data.password, session)
+    if not user:
         raise UserNotFoundOrIncorrectPassword
-    access_token = criar_token(usuario.id, "access")
+    access_token = create_token(user.id, "access")
     return {"access_token": access_token, "token_type": "Bearer"}
