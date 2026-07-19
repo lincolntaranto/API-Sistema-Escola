@@ -10,32 +10,32 @@ from services.auth import (
     login_user,
     login_user_form,
 )
-from core.security import criar_token
+from core.security import create_token
 
-from models import Usuario
+from models import User
 from models.session import get_session
 
-from schemas.usuario import UsuarioSchema
+from schemas.user import UserSchema
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @auth_router.get("/")
-async def autenticar():
+async def authenticate():
     """Rota de autenticação"""
     return {"mensagem": "Rota de autenticação"}
 
 
-@auth_router.post("/usuarios")
-async def criar_conta(
-    usuario_schema: UsuarioSchema, session: Session = Depends(get_session)
+@auth_router.post("/users")
+async def create_account(
+    user_schema: UserSchema, session: Session = Depends(get_session)
 ):
-    novo_usuario = create_user(usuario_schema=usuario_schema, session=session)
+    new_user = create_user(user_schema=user_schema, session=session)
 
     return {
         "mensagem": "usuário cadastrado com sucesso!",
-        "id": novo_usuario.id,
-        "email": novo_usuario.email,
+        "id": new_user.id,
+        "email": new_user.email,
     }
 
 
@@ -52,15 +52,15 @@ async def login(login_schema: LoginSchema, session: Session = Depends(get_sessio
 
 @auth_router.post("/login-form")
 async def login_form(
-    dados_formulario: OAuth2PasswordRequestForm = Depends(),
+    form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),
 ):
-    login_f = login_user_form(form_data=dados_formulario, session=session)
+    login_f = login_user_form(form_data=form_data, session=session)
 
     return {"access_token": login_f["access_token"], "token_type": "Bearer"}
 
 
 @auth_router.patch("/sessions")
-async def user_refresh_token(usuario: Usuario = Depends(verify_refresh_token)):
-    acess_token = criar_token(usuario.id, "access")
-    return {"acess_token": acess_token, "token_type": "Bearer"}
+async def user_refresh_token(user: User = Depends(verify_refresh_token)):
+    access_token = create_token(user.id, "access")
+    return {"acess_token": access_token, "token_type": "Bearer"}

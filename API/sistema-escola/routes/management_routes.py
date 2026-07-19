@@ -2,33 +2,33 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from models.session import get_session
-from models import Usuario
-from schemas.aluno.aluno import AlunoSchema
-from schemas.aluno.aluno_update import AlunoUpdateSchema
-from schemas.cargo import CargoSchema
-from schemas.convite import ConviteSchema
-from schemas.nota.nota import NotaSchema
-from schemas.nota.nota_update import NotaUpdateSchema
-from schemas.turma.turma import TurmaSchema
-from schemas.turma.turma_update import TurmaUpdateSchema
-from services.auth import verificar_token
-from core.authorization import verificar_autorizacao
-from services.aluno import (
+from models import User
+from schemas.student.student import StudentSchema
+from schemas.student.student_update import StudentUpdateSchema
+from schemas.role import RoleSchema
+from schemas.invite import InviteSchema
+from schemas.grade.grade import GradeSchema
+from schemas.grade.grade_update import GradeUpdateSchema
+from schemas.classroom.classroom import ClassroomSchema
+from schemas.classroom.classroom_update import ClassroomUpdateSchema
+from services.auth import verify_token
+from core.authorization import verify_authorization
+from services.student import (
     consult_student_by_id,
     register_student,
     delete_student,
     update_student,
     list_students,
 )
-from services.cargo import (
+from services.role import (
     consult_position,
     register_position,
     delete_position,
     update_position,
 )
-from services.convite import register_invite
-from services.nota import consult_grade, register_grade, update_grade
-from services.turma import (
+from services.invite import register_invite
+from services.grade import consult_grade, register_grade, update_grade
+from services.classroom import (
     consult_classroom,
     register_classroom,
     delete_classroom,
@@ -38,354 +38,350 @@ from services.turma import (
 management_router = APIRouter(tags=["management"])
 
 
-@management_router.get("/alunos/{id_aluno}")
-async def mostrar_alunos(
-    id_aluno: int,
+@management_router.get("/students/{student_id}")
+async def get_student(
+    student_id: int,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para consultar alunos registrados no sistema."""
 
-    aluno = consult_student_by_id(id_aluno=id_aluno, session=session, usuario=usuario)
+    student = consult_student_by_id(student_id=student_id, session=session, user=user)
     return {
-        "nome": aluno.nome,
-        "turma": aluno.turma,
-        "data_nascimento": aluno.data_nascimento,
-        "responsavel": aluno.nome_responsavel,
-        "celular_responsavel": aluno.celular_responsavel,
+        "name": student.name,
+        "classroom": student.classroom,
+        "birth_date": student.birth_date,
+        "guardian_name": student.parents_name,
+        "guardian_phone": student.guardian_phone,
     }
 
 
-@management_router.get("/alunos")
-async def listar_alunos(
-    turma: int | None = None,
-    nome: str | None = None,
-    pagina: int = 1,
-    tamanho: int = 20,
+@management_router.get("/students")
+async def get_students(
+    classroom: int | None = None,
+    name: str | None = None,
+    page: int = 1,
+    size: int = 20,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para listar alunos com filtros e paginação."""
-    alunos, total = list_students(
+    students, total = list_students(
         session=session,
-        turma=turma,
-        nome=nome,
-        pagina=pagina,
-        tamanho=tamanho,
+        classroom=classroom,
+        name=name,
+        page=page,
+        size=size,
     )
     return {
         "items": [
             {
-                "id": aluno.id,
-                "nome": aluno.nome,
-                "turma": aluno.turma,
-                "data_nascimento": aluno.data_nascimento,
+                "id": student.id,
+                "name": student.name,
+                "classroom": student.classroom,
+                "birth_date": student.birth_date,
             }
-            for aluno in alunos
+            for student in students
         ],
-        "pagina": pagina,
-        "tamanho": tamanho,
+        "page": page,
+        "size": size,
         "total": total,
-        "total_paginas": (total + tamanho - 1) // tamanho,
+        "total_pages": (total + size - 1) // size,
     }
 
 
-@management_router.post("/alunos")
-async def cadastrar_aluno(
-    aluno_schema: AlunoSchema,
+@management_router.post("/students")
+async def create_student(
+    student_schema: StudentSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para cadastrar um aluno no sistema"""
 
-    novo_aluno = register_student(
-        aluno_schema=aluno_schema, session=session, usuario=usuario
+    new_student = register_student(
+        student_schema=student_schema, session=session, user=user
     )
     return {
         "mensagem": "Aluno cadastrado com sucesso!",
-        "id": novo_aluno.id,
-        "nome": novo_aluno.nome,
-        "turma": novo_aluno.turma,
+        "id": new_student.id,
+        "name": new_student.name,
+        "classroom": new_student.classroom,
     }
 
 
-@management_router.delete("/alunos/{id_aluno}")
-async def apagar_aluno(
-    id_aluno: int,
+@management_router.delete("/students/{student_id}")
+async def remove_student(
+    student_id: int,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para deletar um aluno do sistema"""
 
-    aluno = delete_student(id_aluno=id_aluno, session=session, usuario=usuario)
+    student = delete_student(student_id=student_id, session=session, user=user)
     return {
         "mensagem": "Aluno deletado com sucesso!",
-        "id": aluno.id,
-        "nome": aluno.nome,
-        "turma": aluno.turma,
+        "id": student.id,
+        "name": student.name,
+        "classroom": student.classroom,
     }
 
 
-@management_router.patch("/alunos/{id_aluno}")
-async def atualizar_aluno(
-    id_aluno: int,
-    aluno_update_schema: AlunoUpdateSchema,
+@management_router.patch("/students/{student_id}")
+async def patch_student(
+    student_id: int,
+    student_update_schema: StudentUpdateSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para atualizar um aluno do sistema."""
 
-    aluno = update_student(
-        id_aluno=id_aluno,
-        aluno_update_schema=aluno_update_schema,
+    student = update_student(
+        student_id=student_id,
+        student_update_schema=student_update_schema,
         session=session,
-        usuario=usuario,
+        user=user,
     )
 
     return {
         "mensagem": "Aluno atualizado com sucesso!",
-        "id": aluno.id,
-        "nome": aluno.nome,
+        "id": student.id,
+        "name": student.name,
     }
 
 
-@management_router.get("/turmas/{id_turma}")
-async def mostrar_turmas(
-    id_turma: int,
+@management_router.get("/classrooms/{classroom_id}")
+async def get_classroom(
+    classroom_id: int,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para consultar turmas no sistema"""
 
-    turma = consult_classroom(id_turma=id_turma, session=session, usuario=usuario)
+    classroom = consult_classroom(classroom_id=classroom_id, session=session, user=user)
     return {
-        "turma": turma.nome,
-        "serie": turma.serie,
-        "ano": turma.ano,
-        "turno": turma.turno,
+        "classroom": classroom.name,
+        "school_year": classroom.school_year,
+        "year": classroom.year,
+        "shift": classroom.shift,
     }
 
 
-@management_router.post("/turmas")
-async def cadastrar_turma(
-    turma_schema: TurmaSchema,
+@management_router.post("/classrooms")
+async def create_classroom(
+    classroom_schema: ClassroomSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para cadastrar uma turma no sistema"""
 
-    nova_turma = register_classroom(
-        turma_schema=turma_schema, session=session, usuario=usuario
+    new_classroom = register_classroom(
+        classroom_schema=classroom_schema, session=session, user=user
     )
     return {
         "mensagem": "Turma cadastrada com sucesso!",
-        "id": nova_turma.id,
-        "nome": nova_turma.nome,
-        "serie": nova_turma.serie,
-        "ano": nova_turma.ano,
-        "turno": nova_turma.turno,
+        "id": new_classroom.id,
+        "name": new_classroom.name,
+        "school_year": new_classroom.school_year,
+        "year": new_classroom.year,
+        "shift": new_classroom.shift,
     }
 
 
-@management_router.delete("/turmas/{id_turma}")
-async def apagar_turma(
-    id_turma: int,
+@management_router.delete("/classrooms/{classroom_id}")
+async def remove_classroom(
+    classroom_id: int,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para apagar uma turma do sistema."""
 
-    turma = delete_classroom(id_turma=id_turma, session=session, usuario=usuario)
+    classroom = delete_classroom(classroom_id=classroom_id, session=session, user=user)
     return {
         "mensagem": "Turma deletada com sucesso!",
-        "id": turma.id,
-        "nome": turma.nome,
-        "serie": turma.serie,
-        "turno": turma.turno,
-        "ano": turma.ano,
+        "id": classroom.id,
+        "name": classroom.name,
+        "school_year": classroom.school_year,
+        "shift": classroom.shift,
+        "year": classroom.year,
     }
 
 
-@management_router.patch("/turmas/{id_turma}")
-async def atualizar_turma(
-    id_turma: int,
-    turma_update_schema: TurmaUpdateSchema,
+@management_router.patch("/classrooms/{classroom_id}")
+async def patch_classroom(
+    classroom_id: int,
+    classroom_update_schema: ClassroomUpdateSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para atualizar uma turma do sistema."""
 
-    turma = update_classroom(
-        id_turma=id_turma,
-        turma_update_schema=turma_update_schema,
+    classroom = update_classroom(
+        classroom_id=classroom_id,
+        classroom_update_schema=classroom_update_schema,
         session=session,
-        usuario=usuario,
+        user=user,
     )
 
     return {
         "mensagem": "Turma atualizada com sucesso!",
-        "id": turma.id,
-        "nome": turma.nome,
-        "serie": turma.serie,
-        "ano": turma.ano,
-        "turno": turma.turno,
+        "id": classroom.id,
+        "name": classroom.name,
+        "school_year": classroom.school_year,
+        "year": classroom.year,
+        "shift": classroom.shift,
     }
 
 
-@management_router.get("/cargos/{id_cargo}")
-async def mostrar_cargos(
-    id_cargo: int,
+@management_router.get("/roles/{role_id}")
+async def get_role(
+    role_id: int,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para consultar cargos no sistema."""
 
-    cargo = consult_position(id_cargo=id_cargo, session=session, usuario=usuario)
-    return {"nome": cargo.nome}
+    role = consult_position(role_id=role_id, session=session, user=user)
+    return {"name": role.name}
 
 
-@management_router.post("/cargos")
-async def cadastrar_cargo(
-    cargo_schema: CargoSchema,
+@management_router.post("/roles")
+async def create_role(
+    role_schema: RoleSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para cadastrar um cargo no sistema."""
 
-    verificar_autorizacao(usuario)
-    novo_cargo = register_position(
-        cargo_schema=cargo_schema, session=session, usuario=usuario
-    )
+    verify_authorization(user)
+    new_role = register_position(role_schema=role_schema, session=session, user=user)
     return {
         "mensagem": "Cargo cadastrado com sucesso!",
-        "id": novo_cargo.id,
-        "nome": novo_cargo.nome,
+        "id": new_role.id,
+        "name": new_role.name,
     }
 
 
-@management_router.delete("/cargos/{id_cargo}")
-async def apagar_cargo(
-    id_cargo: int,
+@management_router.delete("/roles/{role_id}")
+async def remove_role(
+    role_id: int,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para apagar um cargo do sistema."""
 
-    verificar_autorizacao(usuario)
-    cargo = delete_position(id_cargo=id_cargo, session=session, usuario=usuario)
+    verify_authorization(user)
+    role = delete_position(role_id=role_id, session=session, user=user)
     return {
         "mensagem": "Cargo deletado com sucesso!",
-        "id": cargo.id,
-        "nome": cargo.nome,
+        "id": role.id,
+        "name": role.name,
     }
 
 
-@management_router.patch("/cargos/{id_cargo}")
-async def atualizar_cargo(
-    id_cargo: int,
-    cargo_schema: CargoSchema,
+@management_router.patch("/roles/{role_id}")
+async def patch_role(
+    role_id: int,
+    role_schema: RoleSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para atualizar um cargo no sistema."""
 
-    verificar_autorizacao(usuario)
-    cargo = update_position(
-        id_cargo=id_cargo, cargo_schema=cargo_schema, session=session, usuario=usuario
+    verify_authorization(user)
+    role = update_position(
+        role_id=role_id, role_schema=role_schema, session=session, user=user
     )
 
-    return {"mensagem": "Cargo atualizado com sucesso!", "id": cargo.id}
+    return {"mensagem": "Cargo atualizado com sucesso!", "id": role.id}
 
 
-@management_router.get("/alunos/{id_aluno}/notas")
-async def mostrar_notas(
-    id_aluno: int,
-    materia: str,
-    bimestre: int,
-    ano: int,
+@management_router.get("/students/{student_id}/grades")
+async def get_grades(
+    student_id: int,
+    school_subject: str,
+    bimester: int,
+    year: int,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """ "Rota para consultar notas de alunos no sistema."""
-    nota = consult_grade(
-        id_aluno=id_aluno,
-        materia=materia,
-        bimestre=bimestre,
-        ano=ano,
+    grade = consult_grade(
+        student_id=student_id,
+        school_subject=school_subject,
+        bimester=bimester,
+        year=year,
         session=session,
-        usuario=usuario,
+        user=user,
     )
     return {
-        "nome": nota.id_aluno,
-        "ano": nota.ano,
-        "materia": nota.materia,
-        "bimestre": nota.bimestre,
-        "nota": nota.nota,
+        "name": grade.student_id,
+        "year": grade.year,
+        "school_subject": grade.school_subject,
+        "bimester": grade.bimester,
+        "grade": grade.grade,
     }
 
 
-@management_router.post("/notas")
-async def cadastrar_nota(
-    nota_schema: NotaSchema,
+@management_router.post("/grades")
+async def create_grade(
+    grade_schema: GradeSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para cadastrar nota de um aluno no sistema."""
 
-    nova_nota = register_grade(
-        nota_schema=nota_schema, session=session, usuario=usuario
-    )
+    new_grade = register_grade(grade_schema=grade_schema, session=session, user=user)
     return {
         "mensagem": "Nota cadastrada com sucesso!",
-        "id": nova_nota.id,
-        "id_aluno": nova_nota.id_aluno,
-        "ano": nova_nota.ano,
-        "materia": nova_nota.materia,
-        "bimestre": nova_nota.bimestre,
-        "nota": nova_nota.nota,
+        "id": new_grade.id,
+        "student_id": new_grade.student_id,
+        "year": new_grade.year,
+        "school_subject": new_grade.school_subject,
+        "bimester": new_grade.bimester,
+        "grade": new_grade.grade,
     }
 
 
-@management_router.patch("/notas/{id_nota}")
-async def atualizar_nota(
-    id_nota: int,
-    nota_update_schema: NotaUpdateSchema,
+@management_router.patch("/grades/{grade_id}")
+async def patch_grade(
+    grade_id: int,
+    grade_update_schema: GradeUpdateSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para atualizar uma nota do sistema."""
-    nota = update_grade(
-        id_nota=id_nota,
-        nota_update_schema=nota_update_schema,
+    grade = update_grade(
+        grade_id=grade_id,
+        grade_update_schema=grade_update_schema,
         session=session,
-        usuario=usuario,
+        user=user,
     )
 
     return {
         "mensagem": "Nota atualizada com sucesso!",
-        "id": nota.id,
-        "aluno_id": nota.id_aluno,
-        "ano": nota.ano,
-        "materia": nota.materia,
-        "bimestre": nota.bimestre,
-        "nota": nota.nota,
+        "id": grade.id,
+        "student_id": grade.student_id,
+        "year": grade.year,
+        "school_subject": grade.school_subject,
+        "bimester": grade.bimester,
+        "grade": grade.grade,
     }
 
 
-@management_router.post("/convites")
-async def cadastrar_convite(
-    convite_schema: ConviteSchema,
+@management_router.post("/invites")
+async def create_invite_route(
+    invite_schema: InviteSchema,
     session: Session = Depends(get_session),
-    usuario: Usuario = Depends(verificar_token),
+    user: User = Depends(verify_token),
 ):
     """Rota para cadastrar um convite no sistema."""
 
-    verificar_autorizacao(usuario)
-    token_convite = register_invite(
-        convite_schema=convite_schema, session=session, usuario=usuario
+    verify_authorization(user)
+    invite_token = register_invite(
+        invite_schema=invite_schema, session=session, user=user
     )
     return {
         "mensagem": "Convite criado com sucesso!",
-        "convite_token": token_convite,
-        "id_cargo": convite_schema.id_cargo,
+        "invite_token": invite_token,
+        "role_id": invite_schema.role_id,
     }
