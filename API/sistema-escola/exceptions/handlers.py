@@ -5,7 +5,7 @@ from exceptions.student_exceptions import (
     StudentNotFound,
     StudentAlreadyExists,
 )
-from exceptions.role_exceptions import PositionNotFound, PositionAlreadyExists
+from exceptions.role_exceptions import RoleNotFound, RoleAlreadyExists
 from exceptions.invite_exceptions import InvalidInvite, UsedInvitation
 from exceptions.grade_exceptions import GradeNotFound, GradeAlreadyExists
 from exceptions.classroom_exceptions import ClassroomNotFound, ClassroomAlreadyExists
@@ -27,9 +27,7 @@ def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(ClassroomNotFound)
     async def _(request, exc):
-        return JSONResponse(
-            status_code=404, content={"detail": "Classroom inexistente!"}
-        )
+        return JSONResponse(status_code=404, content={"detail": "Turma inexistente!"})
 
     @app.exception_handler(StudentAlreadyExists)
     async def _(request, exc):
@@ -37,25 +35,23 @@ def register_exception_handlers(app: FastAPI):
 
     @app.exception_handler(ClassroomAlreadyExists)
     async def _(request, exc):
-        return JSONResponse(
-            status_code=400, content={"detail": "Classroom já cadastrada!"}
-        )
+        return JSONResponse(status_code=400, content={"detail": "Turma já cadastrada!"})
 
-    @app.exception_handler(PositionNotFound)
+    @app.exception_handler(RoleNotFound)
     async def _(request, exc):
-        return JSONResponse(status_code=404, content={"detail": "Role inexistente!"})
+        return JSONResponse(status_code=404, content={"detail": "Cargo inexistente!"})
 
-    @app.exception_handler(PositionAlreadyExists)
+    @app.exception_handler(RoleAlreadyExists)
     async def _(request, exc):
-        return JSONResponse(status_code=400, content={"detail": "Role já cadastrado!"})
+        return JSONResponse(status_code=400, content={"detail": "Cargo já cadastrado!"})
 
     @app.exception_handler(GradeNotFound)
     async def _(request, exc):
-        return JSONResponse(status_code=404, content={"detail": "Grade inexistente!"})
+        return JSONResponse(status_code=404, content={"detail": "Nota inexistente!"})
 
     @app.exception_handler(GradeAlreadyExists)
     async def _(request, exc):
-        return JSONResponse(status_code=400, content={"detail": "Grade já cadastrada!"})
+        return JSONResponse(status_code=400, content={"detail": "Nota já cadastrada!"})
 
     @app.exception_handler(UserNotFound)
     async def _(request, exc):

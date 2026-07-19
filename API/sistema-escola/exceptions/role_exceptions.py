@@ -1,8 +1,8 @@
-class PositionNotFound(Exception):
+class RoleNotFound(Exception):
     """Levantada quando um cargo não é encontrada."""
 
     pass
 
 
-class PositionAlreadyExists(Exception):
+class RoleAlreadyExists(Exception):
     """Levantada quando se tenta cadastrar um cargo já cadastrado."""
