@@ -37,67 +37,67 @@ sistema-escola/
 │
 ├── exceptions/
 │   ├── __init__.py
-│   ├── aluno_exceptions.py    # Exceções de domínio de aluno
-│   ├── cargo_exceptions.py    # Exceções de domínio de cargo
+│   ├── student_exceptions.py  # Exceções de domínio de aluno
+│   ├── role_exceptions.py     # Exceções de domínio de cargo
 │   ├── invite_exceptions.py   # Exceções de domínio de convite
-│   ├── nota_exceptions.py     # Exceções de domínio de nota
-│   ├── turma_exceptions.py    # Exceções de domínio de turma
+│   ├── grade_exceptions.py    # Exceções de domínio de nota
+│   ├── classroom_exceptions.py # Exceções de domínio de turma
 │   ├── handlers.py            # Registro centralizado dos exception handlers
-│   └── user_exceptions.pt     # Exceções de domínio de usuario
+│   └── user_exceptions.py     # Exceções de domínio de usuário
 │
 ├── models/
 │   ├── __init__.py
-│   ├── aluno.py                # Model de alunos
+│   ├── student.py              # Model de alunos
 │   ├── base.py                 # Base declarativa do SQLAlchemy
-│   ├── cargo.py                # Model de cargos
-│   ├── convites.py             # Model de convites
+│   ├── role.py                 # Model de cargos
+│   ├── invite.py               # Model de convites
 │   ├── log.py                  # Model de logs do sistema
-│   ├── nota.py                 # Model de notas
+│   ├── grade.py                # Model de notas
 │   ├── session.py              # Sessão do banco
-│   ├── turma.py                # Model de turmas
-│   └── usuario.py              # Model de usuários
+│   ├── classroom.py            # Model de turmas
+│   └── user.py                 # Model de usuários
 │
-├── routers/
+├── routes/
 │   ├── __init__.py
 │   ├── auth_routes.py         # Rotas de autenticação
 │   └── management_routes.py   # Rotas de gerenciamento
 │
 ├── services/
 │   ├── __init__.py
-│   ├── aluno.py                # Regras de negócio de aluno
+│   ├── student.py              # Regras de negócio de aluno
 │   ├── auth.py                 # Regras de negócio de autenticação
-│   ├── cargo.py                # Regras de negócio de cargo
-│   ├── convite.py              # Regras de negócio de convite
-│   ├── nota.py                 # Regras de negócio de nota
-│   ├── turma.py                # Regras de negócio de turma
-│   └── user.py                 # Regras de negócio de usuario
+│   ├── role.py                 # Regras de negócio de cargo
+│   ├── invite.py               # Regras de negócio de convite
+│   ├── grade.py                # Regras de negócio de nota
+│   ├── classroom.py            # Regras de negócio de turma
+│   └── user.py                 # Regras de negócio de usuário
 │
 ├── schemas/
-│   ├── aluno/
+│   ├── student/
 │   │   ├── __init__.py
-│   │   ├── aluno.py           # Schema de aluno
-│   │   └── aluno_update.py    # Schema de atualização de aluno
+│   │   ├── student.py         # Schema de aluno
+│   │   └── student_update.py  # Schema de atualização de aluno
 │   │
-│   ├── nota/
-│   │   ├── nota.py            # Schema de nota
-│   │   └── nota_update.py     # Schema de atualização de nota
+│   ├── grade/
+│   │   ├── grade.py           # Schema de nota
+│   │   └── grade_update.py    # Schema de atualização de nota
 │   │
-│   ├── turma/
-│   │   ├── turma.py           # Schema de turma
-│   │   └── turma_update.py    # Schema de atualização de turma
+│   ├── classroom/
+│   │   ├── classroom.py       # Schema de turma
+│   │   └── classroom_update.py # Schema de atualização de turma
 │   │
 │   ├── __init__.py
-│   ├── cargo.py               # Schema de cargo
-│   ├── convite.py             # Schema de convite
+│   ├── role.py                # Schema de cargo
+│   ├── invite.py              # Schema de convite
 │   ├── login.py               # Schema de login
-│   └── usuario.py             # Schema de usuário
+│   └── user.py                # Schema de usuário
 │
 ├── tests/
 │   ├── conftest.py            # Fixtures base do pytest
 │   ├── test_auth.py           # Testes de autenticação
 │   └── test_management.py     # Testes das rotas de gerenciamento
 │
-├── dados_iniciais.py          # Seed de dados iniciais
+├── initial_data.py            # Seed de dados iniciais
 ├── main.py                    # Entrypoint da aplicação
 ├── Dockerfile                 # Imagem Docker da API
 ├── docker-compose.yml         # Orquestra API + banco
@@ -115,12 +115,12 @@ sistema-escola/
 
 O projeto segue uma arquitetura em camadas:
 
-- **`routers/`** — recebem a requisição HTTP, chamam o service correspondente e devolvem a resposta. Não acessam o banco diretamente nem tratam exceções de domínio manualmente (isso é feito pelos handlers globais).
+- **`routes/`** — recebem a requisição HTTP, chamam o service correspondente e devolvem a resposta. Não acessam o banco diretamente nem tratam exceções de domínio manualmente (isso é feito pelos handlers globais).
 - **`services/`** — concentram as regras de negócio: consultas ao banco, validações, criação de logs de auditoria e commits. Nenhum acesso ao banco deve acontecer diretamente nos routers.
 - **`exceptions/`** — exceções de domínio (ex: `StudentNotFound`, `GradeNotFound`), levantadas pelos services e tratadas globalmente via `exceptions/handlers.py`, registrado em `main.py`.
 - **`models/`** — mapeamento ORM das tabelas, usando a sintaxe `Mapped`/`mapped_column` do SQLAlchemy 2.0.
 
-Ações sensíveis (cadastro, atualização e remoção de registros) geram um registro na tabela `Log`, e a exclusão de alunos é feita via **soft delete** (campo `deletado`), preservando o histórico de auditoria.
+Ações sensíveis (cadastro, atualização e remoção de registros) geram um registro na tabela `Log`, e a exclusão de alunos é feita via **soft delete** (campo `deleted`), preservando o histórico de auditoria.
 
 ---
 
@@ -167,8 +167,8 @@ docker compose exec api alembic upgrade head
 ### 3. Popule o banco
 
 ```bash
-# Seed para dados inciais
-docker compose exec api python dados_iniciais.py
+# Seed para dados iniciais
+docker compose exec api python initial_data.py
 ```
 
 A documentação interativa estará disponível em `http://localhost:8000/docs`.
@@ -198,58 +198,58 @@ Todas as rotas da API são versionadas e vivem sob o prefixo `/api/v1`, para per
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
 | GET | `/api/v1/auth/` | Rota de health-check da autenticação | ❌ |
-| POST | `/api/v1/auth/usuarios` | Cria um novo usuário (requer convite) | ❌ |
+| POST | `/api/v1/auth/users` | Cria um novo usuário (requer convite) | ❌ |
 | POST | `/api/v1/auth/sessions` | Login com email e senha, retorna access e refresh token | ❌ |
 | POST | `/api/v1/auth/login-form` | Login via formulário OAuth2 (usado pelo `/docs`) | ❌ |
 | PATCH | `/api/v1/auth/sessions` | Gera um novo access token a partir do refresh token | ✅ (refresh token) |
 
 ### Management — `/api/v1`
 
-#### Alunos
+#### Students
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| GET | `/api/v1/alunos/{id_aluno}` | Consulta um aluno pelo ID | ✅ |
-| GET | `/api/v1/alunos` | Lista alunos com filtros (`turma`, `nome`) e paginação (`pagina`, `tamanho`) | ✅ |
-| POST | `/api/v1/alunos` | Cadastra um novo aluno | ✅ |
-| DELETE | `/api/v1/alunos/{id_aluno}` | Remove um aluno do sistema (soft delete) | ✅ |
-| PATCH | `/api/v1/alunos/{id_aluno}` | Atualiza os dados de um aluno | ✅ |
+| GET | `/api/v1/students/{student_id}` | Consulta um aluno pelo ID | ✅ |
+| GET | `/api/v1/students` | Lista alunos com filtros (`classroom`, `name`) e paginação (`page`, `size`) | ✅ |
+| POST | `/api/v1/students` | Cadastra um novo aluno | ✅ |
+| DELETE | `/api/v1/students/{student_id}` | Remove um aluno do sistema (soft delete) | ✅ |
+| PATCH | `/api/v1/students/{student_id}` | Atualiza os dados de um aluno | ✅ |
 
-#### Turmas
-
-| Método | Rota | Descrição | Auth |
-|--------|------|-----------|------|
-| GET | `/api/v1/turmas/{id_turma}` | Consulta uma turma pelo ID | ✅ |
-| POST | `/api/v1/turmas` | Cadastra uma nova turma | ✅ |
-| DELETE | `/api/v1/turmas/{id_turma}` | Remove uma turma do sistema | ✅ |
-| PATCH | `/api/v1/turmas/{id_turma}` | Atualiza os dados de uma turma | ✅ |
-
-#### Cargos
+#### Classrooms
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| GET | `/api/v1/cargos/{id_cargo}` | Consulta um cargo pelo ID | ✅ |
-| POST | `/api/v1/cargos` | Cadastra um novo cargo | ✅ |
-| DELETE | `/api/v1/cargos/{id_cargo}` | Remove um cargo do sistema | ✅ |
-| PATCH | `/api/v1/cargos/{id_cargo}` | Atualiza os dados de um cargo | ✅ |
+| GET | `/api/v1/classrooms/{classroom_id}` | Consulta uma turma pelo ID | ✅ |
+| POST | `/api/v1/classrooms` | Cadastra uma nova turma | ✅ |
+| DELETE | `/api/v1/classrooms/{classroom_id}` | Remove uma turma do sistema | ✅ |
+| PATCH | `/api/v1/classrooms/{classroom_id}` | Atualiza os dados de uma turma | ✅ |
 
-#### Notas
-
-| Método | Rota | Descrição | Auth |
-|--------|------|-----------|------|
-| GET | `/api/v1/alunos/{id_aluno}/notas` | Consulta notas de um aluno (filtra por `materia`, `bimestre`, `ano`) | ✅ |
-| POST | `/api/v1/notas` | Cadastra uma nova nota | ✅ |
-| PATCH | `/api/v1/notas/{id_nota}` | Atualiza uma nota existente | ✅ |
-
-#### Convites
+#### Roles
 
 | Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| POST | `/api/v1/convites` | Cria um convite para cadastro de usuário | ✅ |
+| GET | `/api/v1/roles/{role_id}` | Consulta um cargo pelo ID | ✅ |
+| POST | `/api/v1/roles` | Cadastra um novo cargo | ✅ |
+| DELETE | `/api/v1/roles/{role_id}` | Remove um cargo do sistema | ✅ |
+| PATCH | `/api/v1/roles/{role_id}` | Atualiza os dados de um cargo | ✅ |
+
+#### Grades
+
+| Método | Rota | Descrição | Auth |
+|--------|------|-----------|------|
+| GET | `/api/v1/students/{student_id}/grades` | Consulta notas de um aluno (filtra por `school_subject`, `bimester`, `year`) | ✅ |
+| POST | `/api/v1/grades` | Cadastra uma nova nota | ✅ |
+| PATCH | `/api/v1/grades/{grade_id}` | Atualiza uma nota existente | ✅ |
+
+#### Invites
+
+| Método | Rota | Descrição | Auth |
+|--------|------|-----------|------|
+| POST | `/api/v1/invites` | Cria um convite para cadastro de usuário | ✅ |
 
 ---
 
 ## Dados iniciais
 
-O arquivo Python chamado `dados_iniciais.py` popula o banco com um cargo inicial ("Diretor") e um superusuário 
+O arquivo Python chamado `initial_data.py` popula o banco com um cargo inicial ("Diretor") e um superusuário 
 administrador, usando as credenciais definidas em `INITIAL_EMAIL`/`INITIAL_PASSWORD` no `.env`.
