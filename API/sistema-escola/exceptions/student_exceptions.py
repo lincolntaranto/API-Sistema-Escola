@@ -1,5 +1,5 @@
 class StudentNotFound(Exception):
-    """Levantada quando um aluno não existe ou foi deletado."""
+    """Levantada quando um aluno não existe ou foi deleted."""
 
     pass
 
