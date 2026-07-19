@@ -3,15 +3,15 @@ from sqlalchemy.orm import Session
 
 from core.crud import update_model
 from core.authorization import verify_authorization
-from exceptions.role_exceptions import PositionNotFound, PositionAlreadyExists
+from exceptions.role_exceptions import RoleNotFound, RoleAlreadyExists
 from models import User, Role, Log
 from schemas.role import RoleSchema
 
 
-def consult_position(role_id: int, session: Session, user: User) -> Role:
+def consult_role(role_id: int, session: Session, user: User) -> Role:
     role = session.execute(select(Role).where(Role.id == role_id)).scalar_one_or_none()
     if not role:
-        raise PositionNotFound
+        raise RoleNotFound
     log = Log(
         user_id=user.id,
         action="consult_role",
@@ -22,13 +22,13 @@ def consult_position(role_id: int, session: Session, user: User) -> Role:
     return role
 
 
-def register_position(role_schema: RoleSchema, session: Session, user: User) -> Role:
+def register_role(role_schema: RoleSchema, session: Session, user: User) -> Role:
     verify_authorization(user)
     role = session.execute(
         select(Role).where(Role.name == role_schema.name)
     ).scalar_one_or_none()
     if role:
-        raise PositionAlreadyExists
+        raise RoleAlreadyExists
     new_role = Role(name=role_schema.name)
     session.add(new_role)
     session.flush()
@@ -43,11 +43,11 @@ def register_position(role_schema: RoleSchema, session: Session, user: User) -> 
     return new_role
 
 
-def delete_position(role_id: int, session: Session, user: User) -> Role:
+def delete_role(role_id: int, session: Session, user: User) -> Role:
     verify_authorization(user)
     role = session.execute(select(Role).where(Role.id == role_id)).scalar_one_or_none()
     if not role:
-        raise PositionNotFound
+        raise RoleNotFound
     session.delete(role)
     log = Log(
         user_id=user.id,
@@ -59,13 +59,13 @@ def delete_position(role_id: int, session: Session, user: User) -> Role:
     return role
 
 
-def update_position(
+def update_role(
     role_id: int, role_schema: RoleSchema, session: Session, user: User
 ) -> Role:
     verify_authorization(user)
     role = session.execute(select(Role).where(Role.id == role_id)).scalar_one_or_none()
     if not role:
-        raise PositionNotFound
+        raise RoleNotFound
     update_model(obj=role, schema=role_schema)
     log = Log(
         user_id=user.id,
@@ -78,8 +78,6 @@ def update_position(
     return role
 
 
-def get_position_by_id_or_none(role_id: int, session: Session) -> Role | None:
-    position = session.execute(
-        select(Role).where(Role.id == role_id)
-    ).scalar_one_or_none()
-    return position
+def get_role_by_id_or_none(role_id: int, session: Session) -> Role | None:
+    role = session.execute(select(Role).where(Role.id == role_id)).scalar_one_or_none()
+    return role
