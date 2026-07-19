@@ -5,11 +5,11 @@ from starlette.testclient import TestClient
 from testcontainers.postgres import PostgresContainer
 
 from core.config import settings
-from dados_iniciais import (
-    popular_cargos,
+from initial_data import (
+    seed_roles,
     create_initial_superuser,
-    popular_alunos,
-    popular_turmas,
+    seed_students,
+    seed_classrooms,
 )
 from main import app
 from models.base import Base
@@ -53,9 +53,9 @@ def clear_database(test_engine):
 
 
 @pytest.fixture(autouse=True)
-def cargo(test_engine):
+def role(test_engine):
     with Session(test_engine) as session:
-        popular_cargos(session=session)
+        seed_roles(session=session)
 
 
 @pytest.fixture(autouse=True)
@@ -67,13 +67,13 @@ def super_user(test_engine):
 @pytest.fixture(autouse=True)
 def classroom(test_engine):
     with Session(test_engine) as session:
-        popular_turmas(session=session)
+        seed_classrooms(session=session)
 
 
 @pytest.fixture(autouse=True)
 def student(test_engine):
     with Session(test_engine) as session:
-        popular_alunos(session=session)
+        seed_students(session=session)
 
 
 @pytest.fixture()
@@ -82,7 +82,7 @@ def token(client):
         "/auth/sessions",
         json={
             "email": settings.INITIAL_EMAIL,
-            "senha": settings.INITIAL_PASSWORD,
+            "password": settings.INITIAL_PASSWORD,
         },
     )
     return response.json()["access_token"]
@@ -91,8 +91,8 @@ def token(client):
 @pytest.fixture()
 def invite(client, token):
     response = client.post(
-        "/convites",
-        json={"id_cargo": 1},
+        "/invites",
+        json={"role_id": 1},
         headers={"Authorization": f"Bearer {token}"},
     )
-    return response.json()["convite_token"]
+    return response.json()["invite_token"]

@@ -1,56 +1,55 @@
 USERDATA = {
-    "nome": "Teste",
+    "name": "Teste",
     "email": "pyteste@email.com",
-    "senha": "123",
-    "cargo": 1,
-    "numero": "123",
+    "password": "123",
+    "role_id": 1,
+    "phone": "123",
 }
 
 
-def criar_usuario_padrao(client, invite):
+def create_default_user(client, invite):
     return client.post(
-        "/auth/usuarios",
+        "/auth/users",
         json={
-            "nome": USERDATA["nome"],
+            "name": USERDATA["name"],
             "email": USERDATA["email"],
-            "senha": USERDATA["senha"],
-            "cargo": USERDATA["cargo"],
-            "numero": USERDATA["numero"],
-            "convite": invite,
+            "password": USERDATA["password"],
+            "phone": USERDATA["phone"],
+            "invite": invite,
         },
     )
 
 
 def test_create_user(client, invite):
-    response = criar_usuario_padrao(client, invite)
+    response = create_default_user(client, invite)
     assert response.status_code == 200
 
 
 def test_create_user_wrong_email(client, invite):
     response = client.post(
-        "/auth/usuarios",
+        "/auth/users",
         json={
-            "nome": "Teste",
+            "name": "Teste",
             "email": "pytesteemail.com",
-            "senha": "123",
-            "cargo": 1,
-            "numero": "123",
-            "convite": invite,
+            "password": "123",
+            "phone": "123",
+            "invite": invite,
         },
     )
     assert response.status_code == 422
 
 
 def test_create_user_duplicate_email(client, invite):
-    criar_usuario_padrao(client, invite)
-    response = criar_usuario_padrao(client, invite)
+    create_default_user(client, invite)
+    response = create_default_user(client, invite)
     assert response.status_code == 400
 
 
 def test_login(client, invite):
-    criar_usuario_padrao(client, invite)
+    create_default_user(client, invite)
     response = client.post(
-        "/auth/sessions", json={"email": USERDATA["email"], "senha": USERDATA["senha"]}
+        "/auth/sessions",
+        json={"email": USERDATA["email"], "password": USERDATA["password"]},
     )
     assert response.status_code == 200
     assert "access_token" in response.json()
@@ -59,14 +58,14 @@ def test_login(client, invite):
 def test_login_email_wrong(client, invite):
     response = client.post(
         "/auth/sessions",
-        json={"email": "wrongemail@email.com", "senha": USERDATA["senha"]},
+        json={"email": "wrongemail@email.com", "password": USERDATA["password"]},
     )
     assert response.status_code == 400
 
 
 def test_login_password_wrong(client, invite):
-    criar_usuario_padrao(client, invite)
+    create_default_user(client, invite)
     response = client.post(
-        "/auth/sessions", json={"email": USERDATA["email"], "senha": "1234"}
+        "/auth/sessions", json={"email": USERDATA["email"], "password": "1234"}
     )
     assert response.status_code == 400
