@@ -6,11 +6,11 @@ from sqlalchemy.orm import Session
 from core.authorization import verify_authorization, create_invite
 from core.config import settings
 from core.security import ALGORITHM
-from exceptions.role_exceptions import PositionNotFound
+from exceptions.role_exceptions import RoleNotFound
 from exceptions.invite_exceptions import UsedInvitation, InvalidInvite
 from models import User, Invite, Role, Log
 from schemas.invite import InviteSchema
-from services.role import get_position_by_id_or_none
+from services.role import get_role_by_id_or_none
 
 
 def register_invite(invite_schema: InviteSchema, session: Session, user: User) -> str:
@@ -19,7 +19,7 @@ def register_invite(invite_schema: InviteSchema, session: Session, user: User) -
         select(Role).where(Role.id == invite_schema.role_id)
     ).scalar_one_or_none()
     if not role:
-        raise PositionNotFound
+        raise RoleNotFound
     new_invite = Invite()
     session.add(new_invite)
     session.flush()
@@ -57,9 +57,9 @@ def verify_invite(token: str, session: Session):
         role_id = int(dict_info.get("role"))
     except InvalidTokenError:
         raise InvalidInvite
-    role = get_position_by_id_or_none(role_id=role_id, session=session)
+    role = get_role_by_id_or_none(role_id=role_id, session=session)
     if not role:
-        raise PositionNotFound
+        raise RoleNotFound
     check_invitation_status(invite_id=invite_id, session=session)
     valid_invite = get_invite_by_id_or_none(invite_id=invite_id, session=session)
     valid_invite.used = True
