@@ -63,4 +63,4 @@ async def login_form(
 @auth_router.patch("/sessions")
 async def user_refresh_token(user: User = Depends(verify_refresh_token)):
     access_token = create_token(user.id, "access")
-    return {"acess_token": access_token, "token_type": "Bearer"}
+    return {"access_token": access_token, "token_type": "Bearer"}
