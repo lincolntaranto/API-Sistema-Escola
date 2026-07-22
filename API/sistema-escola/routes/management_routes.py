@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from models.session import get_session
@@ -61,7 +61,7 @@ async def get_students(
     classroom: int | None = None,
     name: str | None = None,
     page: int = 1,
-    size: int = 20,
+    size: int = Query(default=20, le=100),
     session: Session = Depends(get_session),
     user: User = Depends(verify_token),
 ):
