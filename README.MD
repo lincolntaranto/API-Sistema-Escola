@@ -253,3 +253,28 @@ Todas as rotas da API são versionadas e vivem sob o prefixo `/api/v1`, para per
 
 O arquivo Python chamado `initial_data.py` popula o banco com um cargo inicial ("Diretor") e um superusuário 
 administrador, usando as credenciais definidas em `INITIAL_EMAIL`/`INITIAL_PASSWORD` no `.env`.
+
+
+---
+
+## Decisões Técnicas
+
+### Migração do Bcrypt para Argon2
+
+O projeto iniciou com bcrypt, pois era único algoritmo de hashing de senhas que eu conhecia até então e o único que me 
+foi ensinado a usar. Após algum tempo trabalhando no projeto notei que o repositório oficial do FastAPI (criado pelo 
+Tiangolo) utilizava Argon2 e incluía uma função para migrar senhas de bcrypt para Argon2. Após essa observação eu 
+resolvi pesquisar o porquê de ele ter feito essa migração e quais eram as vantagens. Descobri que:
+
+- O bcrypt é uma tecnologia de 1999 e, apesar de ainda ser seguro, é resistente 
+  apenas em custo computacional (CPU), sem controle sobre uso de memória.
+- O Argon2 foi o vencedor da Password Hashing Competition (2013–2015) e é 
+  atualmente recomendado pela OWASP como primeira escolha para hashing de senhas.
+- Por ser memory-hard (exige quantidade configurável de RAM por hash), o Argon2 
+  encarece significativamente ataques com GPUs e ASICs, algo que o bcrypt não mitiga.
+- O bcrypt trunca silenciosamente senhas com mais de 72 bytes, uma limitação que 
+  o Argon2 não possui.
+
+Com base nisso, resolvi migrar o projeto para Argon2id utilizando a biblioteca  `argon2-cffi`, que através da 
+interface `PasswordHash.recommended()` já entrega os parâmetros de custo (memória, tempo e paralelismo) recomendados, 
+sem que eu precise configurá-los manualmente.
