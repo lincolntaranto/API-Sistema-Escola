@@ -278,3 +278,11 @@ resolvi pesquisar o porquê de ele ter feito essa migração e quais eram as van
 Com base nisso, resolvi migrar o projeto para Argon2id utilizando a biblioteca  `argon2-cffi`, que através da 
 interface `PasswordHash.recommended()` já entrega os parâmetros de custo (memória, tempo e paralelismo) recomendados, 
 sem que eu precise configurá-los manualmente.
+
+### Arquitetura
+
+Optei por usar uma versão simplificada da arquitetura em camadas pelo fato desse ser um dos primeiros projetos onde
+eu estou tentando aplicar uma organização mais séria. Em relação às outras arquiteturas como a Microservices,
+Hexagonal, Clean Architecture entre outras, ainda preciso estudá-las mais a fundo, mas pretendo explorá-las em
+futuros projetos.
+
