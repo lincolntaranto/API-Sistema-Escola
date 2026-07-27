@@ -286,3 +286,9 @@ eu estou tentando aplicar uma organização mais séria. Em relação às outras
 Hexagonal, Clean Architecture entre outras, ainda preciso estudá-las mais a fundo, mas pretendo explorá-las em
 futuros projetos.
 
+### Framework
+
+Optei por usar o FastAPI, pois eu buscava um framework pratico e que me possibilitasse a começar a praticar e 
+desenvolver em pouco tempo, mesmo com pouca experiencia prévia. O mesmo oferece diversas ferramentas interessantes,
+como a geração de documentação automática e validação via Pydantic.
+
