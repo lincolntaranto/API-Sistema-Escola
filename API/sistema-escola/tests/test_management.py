@@ -295,6 +295,14 @@ def test_delete_role(client, token):
     assert response.status_code == 200
 
 
+def test_delete_role_with_not_admin_account(client, token_not_admin):
+    response = client.delete(
+        "/roles/1",
+        headers={"Authorization": f"Bearer {token_not_admin}"},
+    )
+    assert response.status_code == 403
+
+
 def test_consult_grade(client, token):
     create_initial_grade(client, token)
     response = client.get(
