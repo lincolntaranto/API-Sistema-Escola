@@ -273,6 +273,15 @@ def test_update_non_existent_role(client, token):
     assert response.status_code == 404
 
 
+def test_update_role_with_not_admin_account(client, token_not_admin):
+    response = client.patch(
+        "/roles/1",
+        json={"name": "CEO"},
+        headers={"Authorization": f"Bearer {token_not_admin}"},
+    )
+    assert response.status_code == 403
+
+
 def test_consult_grade(client, token):
     create_initial_grade(client, token)
     response = client.get(
