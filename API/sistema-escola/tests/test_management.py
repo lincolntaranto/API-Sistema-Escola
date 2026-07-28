@@ -246,6 +246,15 @@ def test_register_duplicate_position(client, token):
     assert response.status_code == 400
 
 
+def test_register_position_with_not_admin_account(client, token_not_admin):
+    response = client.post(
+        "/roles",
+        json={"name": "Diretor"},
+        headers={"Authorization": f"Bearer {token_not_admin}"},
+    )
+    assert response.status_code == 403
+
+
 def test_update_position(client, token):
     response = client.patch(
         "/roles/1",
