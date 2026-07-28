@@ -212,7 +212,7 @@ def test_update_non_existent_classroom(client, token):
     assert response.status_code == 404
 
 
-def test_consult_position(client, token):
+def test_consult_role(client, token):
     response = client.get(
         "/roles/1",
         headers={"Authorization": f"Bearer {token}"},
@@ -220,7 +220,7 @@ def test_consult_position(client, token):
     assert response.status_code == 200
 
 
-def test_consult_non_existent_position(client, token):
+def test_consult_non_existent_role(client, token):
     response = client.get(
         "/roles/404",
         headers={"Authorization": f"Bearer {token}"},
@@ -228,7 +228,7 @@ def test_consult_non_existent_position(client, token):
     assert response.status_code == 404
 
 
-def test_register_position(client, token):
+def test_register_role(client, token):
     response = client.post(
         "/roles",
         json={"name": "Professor"},
@@ -237,7 +237,7 @@ def test_register_position(client, token):
     assert response.status_code == 200
 
 
-def test_register_duplicate_position(client, token):
+def test_register_duplicate_role(client, token):
     response = client.post(
         "/roles",
         json={"name": "Diretor"},
@@ -246,7 +246,7 @@ def test_register_duplicate_position(client, token):
     assert response.status_code == 400
 
 
-def test_register_position_with_not_admin_account(client, token_not_admin):
+def test_register_role_with_not_admin_account(client, token_not_admin):
     response = client.post(
         "/roles",
         json={"name": "Diretor"},
@@ -255,7 +255,7 @@ def test_register_position_with_not_admin_account(client, token_not_admin):
     assert response.status_code == 403
 
 
-def test_update_position(client, token):
+def test_update_role(client, token):
     response = client.patch(
         "/roles/1",
         json={"name": "CEO"},
@@ -264,7 +264,7 @@ def test_update_position(client, token):
     assert response.status_code == 200
 
 
-def test_update_non_existent_position(client, token):
+def test_update_non_existent_role(client, token):
     response = client.patch(
         "/roles/404",
         json={"name": "CEO"},
@@ -365,7 +365,7 @@ def test_create_invite(client, token):
     assert "invite_token" in response.json()
 
 
-def test_create_non_existent_position_invite(client, token):
+def test_create_non_existent_role_invite(client, token):
     response = client.post(
         "/invites",
         json={"role_id": 404},
