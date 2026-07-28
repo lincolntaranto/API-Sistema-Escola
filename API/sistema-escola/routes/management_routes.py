@@ -304,7 +304,7 @@ async def get_grades(
     session: Session = Depends(get_session),
     user: User = Depends(verify_token),
 ):
-    """ "Rota para consultar notas de alunos no sistema."""
+    """Rota para consultar notas de alunos no sistema."""
     grade = consult_grade(
         student_id=student_id,
         school_subject=school_subject,
