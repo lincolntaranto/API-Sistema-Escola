@@ -96,3 +96,25 @@ def invite(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     return response.json()["invite_token"]
+
+
+@pytest.fixture()
+def token_not_admin(client, invite):
+    client.post(
+        "/auth/users",
+        json={
+            "name": "defaultUser",
+            "email": "defaultuser@gmail.com",
+            "password": "DefaultUser200@",
+            "phone": "40028922",
+            "invite": invite,
+        },
+    )
+    response = client.post(
+        "/auth/sessions",
+        json={
+            "email": "defaultuser@gmail.com",
+            "password": "DefaultUser200@",
+        },
+    )
+    return response.json()["access_token"]
