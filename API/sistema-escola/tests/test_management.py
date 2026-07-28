@@ -363,3 +363,12 @@ def test_create_non_existent_position_invite(client, token):
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+def test_create_invite_with_not_admin_account(client, token_not_admin):
+    response = client.post(
+        "/invites",
+        json={"role_id": 1},
+        headers={"Authorization": f"Bearer {token_not_admin}"},
+    )
+    assert response.status_code == 403
